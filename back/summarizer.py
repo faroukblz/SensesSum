@@ -130,11 +130,8 @@ def abstractive_summarize(text: str) -> Dict:
 
     result = client.summarization(
         input_text,
-        parameters={
-            "max_length": 150,
-            "min_length": 30,
-            "do_sample": False,
-        },
+        max_length=150,
+        min_length=30,
     )
 
     # The client returns a SummarizationOutput with a .summary_text attribute
