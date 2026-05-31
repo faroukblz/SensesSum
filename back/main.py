@@ -19,6 +19,9 @@ from preprocessing import preprocess_text
 from summarizer import extractive_summarize, abstractive_summarize
 from evaluation import evaluate_rouge
 
+from dotenv import load_dotenv
+load_dotenv()
+
 # ─── App Initialisation ──────────────────────────────────────
 
 app = FastAPI(

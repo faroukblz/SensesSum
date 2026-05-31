@@ -6,3 +6,5 @@ scikit-learn>=1.4.0
 requests>=2.31.0
 rouge-score>=0.1.2
 python-multipart>=0.0.20
+python-dotenv>=1.0.0
+
