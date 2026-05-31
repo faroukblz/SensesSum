@@ -131,6 +131,17 @@ def abstractive_summarize(text: str) -> Dict:
     }
 
     response = requests.post(api_url, headers=headers, json=payload)
+    
+    # Hugging Face often returns 503 when the model is warming up/loading
+    if response.status_code == 503:
+        try:
+            wait_time = response.json().get("estimated_time", 10.0)
+        except Exception:
+            wait_time = 10.0
+        # Wait and retry once
+        time.sleep(wait_time)
+        response = requests.post(api_url, headers=headers, json=payload)
+
     if response.status_code != 200:
         raise RuntimeError(f"Hugging Face API Error: {response.status_code} - {response.text}")
 
