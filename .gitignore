@@ -1,0 +1,19 @@
+# Environment
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.env
+.venv/
+env/
+
+# Next.js
+front/.next/
+front/node_modules/
+front/out/
+front/build/
+front/.env*.local
+
+# System
+.DS_Store
+Thumbs.db

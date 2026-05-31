@@ -1,0 +1,364 @@
+@import "tailwindcss";
+
+/* ─── Google Fonts ────────────────────────────────── */
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,700;1,700&display=swap");
+
+/* ─── Design Tokens (CSS Custom Properties) ──────── */
+:root {
+  --lavender: #e0d7ff;
+  --periwinkle: #c5baf2;
+  --deep-violet: #6c5ce7;
+  --soft-violet: #a29bfe;
+  --frost-white: rgba(255, 255, 255, 0.7);
+  --frost-border: rgba(255, 255, 255, 0.25);
+  --text-primary: #1a1625;
+  --text-secondary: #4a4458;
+  --text-muted: #7c7394;
+  --glass-bg: rgba(255, 255, 255, 0.12);
+  --glass-border: rgba(255, 255, 255, 0.2);
+  --shadow-soft: 0 8px 32px rgba(108, 92, 231, 0.12);
+  --shadow-glow: 0 0 60px rgba(108, 92, 231, 0.15);
+  --radius-lg: 24px;
+  --radius-md: 16px;
+  --radius-sm: 10px;
+  --radius-pill: 9999px;
+}
+
+/* ─── Base Reset ──────────────────────────────────── */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: "Inter", system-ui, -apple-system, sans-serif;
+  color: var(--text-primary);
+  overflow-x: hidden;
+  min-height: 100vh;
+}
+
+/* ─── Ambient Fluid Canvas Background ─────────────── */
+.ambient-canvas {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background:
+    radial-gradient(ellipse 80% 60% at 20% 40%, var(--lavender) 0%, transparent 70%),
+    radial-gradient(ellipse 60% 80% at 80% 60%, var(--periwinkle) 0%, transparent 70%),
+    radial-gradient(ellipse 50% 50% at 50% 20%, #f0edff 0%, transparent 60%),
+    linear-gradient(160deg, #f8f6ff 0%, var(--lavender) 40%, var(--periwinkle) 75%, #d4ccf0 100%);
+  animation: meshShift 20s ease-in-out infinite alternate;
+}
+
+@keyframes meshShift {
+  0% {
+    background-position: 0% 0%, 100% 100%, 50% 0%, 0% 0%;
+  }
+  50% {
+    background-position: 30% 20%, 70% 80%, 60% 30%, 10% 10%;
+  }
+  100% {
+    background-position: 10% 40%, 90% 50%, 40% 10%, 5% 5%;
+  }
+}
+
+/* ─── Glassmorphism Utilities ─────────────────────── */
+.glass-card {
+  background: var(--glass-bg);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-soft);
+}
+
+.glass-card-solid {
+  background: rgba(255, 255, 255, 0.65);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: var(--radius-lg);
+  box-shadow:
+    var(--shadow-soft),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+
+/* ─── Typography ──────────────────────────────────── */
+.heading-display {
+  font-family: "Inter", sans-serif;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+}
+
+.heading-italic {
+  font-family: "Playfair Display", serif;
+  font-style: italic;
+  font-weight: 700;
+}
+
+/* ─── Pill Toggle ─────────────────────────────────── */
+.toggle-pill {
+  display: inline-flex;
+  border-radius: var(--radius-pill);
+  background: rgba(255, 255, 255, 0.35);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-border);
+  padding: 4px;
+  gap: 2px;
+}
+
+.toggle-pill button {
+  padding: 10px 22px;
+  border-radius: var(--radius-pill);
+  border: none;
+  font-family: "Inter", sans-serif;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  background: transparent;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.toggle-pill button.active {
+  background: white;
+  color: var(--deep-violet);
+  box-shadow:
+    0 2px 8px rgba(108, 92, 231, 0.15),
+    0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
+.toggle-pill button:hover:not(.active) {
+  color: var(--text-secondary);
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* ─── Action Button ───────────────────────────────── */
+.btn-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 13px 28px;
+  border-radius: var(--radius-pill);
+  border: 1.5px solid var(--text-primary);
+  background: transparent;
+  font-family: "Inter", sans-serif;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-action::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--deep-violet);
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: -1;
+  border-radius: inherit;
+}
+
+.btn-action:hover {
+  color: white;
+  border-color: var(--deep-violet);
+}
+
+.btn-action:hover::before {
+  transform: scaleX(1);
+  transform-origin: left;
+}
+
+.btn-action:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-action:disabled:hover::before {
+  transform: scaleX(0);
+}
+
+.btn-action:disabled:hover {
+  color: var(--text-primary);
+  border-color: var(--text-primary);
+}
+
+.btn-demo {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 13px 24px;
+  border-radius: var(--radius-pill);
+  border: none;
+  background: var(--text-primary);
+  color: white;
+  font-family: "Inter", sans-serif;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-demo:hover {
+  background: var(--deep-violet);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(108, 92, 231, 0.3);
+}
+
+/* ─── Input Textarea ──────────────────────────────── */
+.text-input {
+  width: 100%;
+  min-height: 180px;
+  padding: 24px;
+  border: none;
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.45);
+  font-family: "Inter", sans-serif;
+  font-size: 0.95rem;
+  line-height: 1.7;
+  color: var(--text-primary);
+  resize: vertical;
+  transition: all 0.3s ease;
+  outline: none;
+}
+
+.text-input::placeholder {
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+.text-input:focus {
+  background: rgba(255, 255, 255, 0.6);
+  box-shadow: 0 0 0 2px rgba(108, 92, 231, 0.2);
+}
+
+/* ─── Results Panel ───────────────────────────────── */
+.result-summary {
+  font-family: "Playfair Display", serif;
+  font-size: 1.05rem;
+  line-height: 1.8;
+  color: var(--text-primary);
+}
+
+/* ─── Metric Dials ────────────────────────────────── */
+.metric-card {
+  background: rgba(255, 255, 255, 0.5);
+  backdrop-filter: blur(12px);
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  padding: 20px;
+  text-align: center;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.metric-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(108, 92, 231, 0.12);
+}
+
+.metric-value {
+  font-family: "Inter", sans-serif;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--deep-violet);
+}
+
+.metric-label {
+  font-family: "Inter", sans-serif;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-top: 6px;
+}
+
+/* ─── Badge ───────────────────────────────────────── */
+.badge-beta {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 16px;
+  border-radius: var(--radius-pill);
+  background: rgba(108, 92, 231, 0.1);
+  border: 1px solid rgba(108, 92, 231, 0.2);
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: var(--deep-violet);
+}
+
+/* ─── Scrollbar ───────────────────────────────────── */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(108, 92, 231, 0.2);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(108, 92, 231, 0.35);
+}
+
+/* ─── Loader Spinner ──────────────────────────────── */
+.spinner {
+  width: 20px;
+  height: 20px;
+  border: 2.5px solid rgba(108, 92, 231, 0.2);
+  border-top-color: var(--deep-violet);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ─── 3D Canvas Container ─────────────────────────── */
+.canvas-container {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 55%;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* ─── ROUGE score bars ────────────────────────────── */
+.rouge-bar-track {
+  height: 6px;
+  border-radius: 3px;
+  background: rgba(108, 92, 231, 0.1);
+  overflow: hidden;
+}
+
+.rouge-bar-fill {
+  height: 100%;
+  border-radius: 3px;
+  background: linear-gradient(90deg, var(--soft-violet), var(--deep-violet));
+  transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
