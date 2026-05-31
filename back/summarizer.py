@@ -128,6 +128,7 @@ def abstractive_summarize(text: str) -> Dict:
     mandated by the T5 architecture specification (PRD §5.2 Option B).
     """
     import torch
+    torch.set_num_threads(1)
 
     start = time.perf_counter()
 

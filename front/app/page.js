@@ -95,13 +95,13 @@ export default function Home() {
       <Navbar />
 
       {/* ═══ Main Content ═══ */}
-      <main className="relative z-10 min-h-screen flex flex-col items-start justify-center px-6 md:px-16 pt-24 pb-12">
+      <main className="relative z-10 min-h-screen flex flex-col items-center justify-center px-6 md:px-16 pt-24 pb-12">
         {/* ── Hero Section ────────────────── */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, delay: 0.2, ease: "easeOut" }}
-          className="max-w-2xl w-full space-y-6"
+          className="max-w-2xl w-full space-y-6 flex flex-col items-center text-center"
         >
           {/* Beta badge */}
           <motion.div
@@ -162,7 +162,7 @@ export default function Home() {
             />
 
             {/* Controls bar */}
-            <div className="flex flex-wrap items-center gap-4">
+            <div className="flex flex-wrap items-center justify-center gap-4">
               {/* Mode toggle pill */}
               <div className="toggle-pill">
                 <button
