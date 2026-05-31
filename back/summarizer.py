@@ -128,19 +128,26 @@ def abstractive_summarize(text: str) -> Dict:
         token=api_token,
     )
 
-    result = client.summarization(
-        input_text,
-        max_length=150,
-        min_length=30,
+    import json as _json
+
+    response = client.post(
+        json={
+            "inputs": input_text,
+            "parameters": {
+                "max_length": 150,
+                "min_length": 30,
+                "do_sample": False,
+            },
+        },
     )
 
-    # The client returns a SummarizationOutput with a .summary_text attribute
-    if hasattr(result, "summary_text"):
-        summary = result.summary_text
+    result = _json.loads(response)
+    if isinstance(result, list) and len(result) > 0 and "summary_text" in result[0]:
+        summary = result[0]["summary_text"]
+    elif isinstance(result, list) and len(result) > 0 and "generated_text" in result[0]:
+        summary = result[0]["generated_text"]
     elif isinstance(result, dict) and "summary_text" in result:
         summary = result["summary_text"]
-    elif isinstance(result, str):
-        summary = result
     else:
         raise RuntimeError(f"Unexpected response format from HF API: {result}")
 
