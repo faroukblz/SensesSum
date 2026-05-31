@@ -102,12 +102,13 @@ def extractive_summarize(text: str, num_sentences: int = 3) -> Dict:
 
 def abstractive_summarize(text: str) -> Dict:
     """
-    Abstractive summarisation using the T5-Small model via the 
-    Hugging Face Inference API. The input is prefixed with 
-    "summarize: " as mandated by the T5 architecture specification.
+    Abstractive summarisation using the T5-Small model via the
+    Hugging Face Inference API (huggingface_hub client).
+    The input is prefixed with "summarize: " as mandated by the
+    T5 architecture specification.
     """
     import os
-    import requests
+    from huggingface_hub import InferenceClient
 
     start = time.perf_counter()
     cleaned = clean_text(text)
@@ -117,39 +118,32 @@ def abstractive_summarize(text: str) -> Dict:
 
     api_token = os.environ.get("HF_API_TOKEN")
     if not api_token:
-        raise ValueError("HF_API_TOKEN environment variable is not set. Please add it to your environment or Render dashboard.")
+        raise ValueError(
+            "HF_API_TOKEN environment variable is not set. "
+            "Please add it to your environment or Render dashboard."
+        )
 
-    api_url = "https://api-inference.huggingface.co/models/google-t5/t5-small"
-    headers = {"Authorization": f"Bearer {api_token}"}
-    payload = {
-        "inputs": input_text,
-        "parameters": {
+    client = InferenceClient(
+        model="google-t5/t5-small",
+        token=api_token,
+    )
+
+    result = client.summarization(
+        input_text,
+        parameters={
             "max_length": 150,
             "min_length": 30,
-            "do_sample": False
-        }
-    }
+            "do_sample": False,
+        },
+    )
 
-    response = requests.post(api_url, headers=headers, json=payload)
-    
-    # Hugging Face often returns 503 when the model is warming up/loading
-    if response.status_code == 503:
-        try:
-            wait_time = response.json().get("estimated_time", 10.0)
-        except Exception:
-            wait_time = 10.0
-        # Wait and retry once
-        time.sleep(wait_time)
-        response = requests.post(api_url, headers=headers, json=payload)
-
-    if response.status_code != 200:
-        raise RuntimeError(f"Hugging Face API Error: {response.status_code} - {response.text}")
-
-    result = response.json()
-    if isinstance(result, list) and len(result) > 0 and "summary_text" in result[0]:
-        summary = result[0]["summary_text"]
-    elif isinstance(result, list) and len(result) > 0 and "generated_text" in result[0]:
-        summary = result[0]["generated_text"]
+    # The client returns a SummarizationOutput with a .summary_text attribute
+    if hasattr(result, "summary_text"):
+        summary = result.summary_text
+    elif isinstance(result, dict) and "summary_text" in result:
+        summary = result["summary_text"]
+    elif isinstance(result, str):
+        summary = result
     else:
         raise RuntimeError(f"Unexpected response format from HF API: {result}")
 
