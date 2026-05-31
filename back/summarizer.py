@@ -152,8 +152,8 @@ def abstractive_summarize(text: str) -> Dict:
             inputs.input_ids,
             max_length=150,
             min_length=30,
-            num_beams=4,
-            early_stopping=True,
+            num_beams=1,
+            do_sample=False,
         )
 
     summary = tokenizer.decode(output_ids[0], skip_special_tokens=True)
