@@ -117,6 +117,13 @@ def _load_t5():
 
         _t5_tokenizer = AutoTokenizer.from_pretrained("t5-small")
         _t5_model = AutoModelForSeq2SeqLM.from_pretrained("t5-small")
+        
+        # Quantize the model dynamically to int8 to save ~70% RAM and speed up CPU inference on Render
+        import torch
+        _t5_model = torch.quantization.quantize_dynamic(
+            _t5_model, {torch.nn.Linear}, dtype=torch.qint8
+        )
+        
         _t5_model.eval()
     return _t5_model, _t5_tokenizer
 
