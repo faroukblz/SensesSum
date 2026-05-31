@@ -4,11 +4,13 @@ services:
     name: sensessum-backend
     env: python
     rootDir: back
-    buildCommand: "pip install -r requirements.txt && python download_model.py"
+    buildCommand: "pip install -r requirements.txt"
     startCommand: "python -m uvicorn main:app --host 0.0.0.0 --port $PORT"
     envVars:
+      - key: HF_API_TOKEN
+        sync: false # User needs to set this in the Render dashboard
       - key: PYTHON_VERSION
-        value: 3.10.12 # Ensure compatibility with T5/Torch
+        value: 3.10.12 # Ensure compatibility
 
   # Next.js Frontend Service
   - type: web

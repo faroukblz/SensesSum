@@ -96,74 +96,52 @@ def extractive_summarize(text: str, num_sentences: int = 3) -> Dict:
 
 
 # ═══════════════════════════════════════════
-# Abstractive Engine (Hugging Face T5-Small)
-# Syllabus Chapters VI.4 / VI.5.2
+# Abstractive Engine (Hugging Face API)
+# Syllabus Chapters VI.4 / VI.5.2 (Modified for HF API)
 # ═══════════════════════════════════════════
-
-_t5_model = None      # Lazy-loaded singleton
-_t5_tokenizer = None  # Lazy-loaded singleton
-
-
-def _load_t5():
-    """
-    Lazily loads the T5-Small model and tokenizer using
-    AutoModelForSeq2SeqLM + AutoTokenizer (compatible with
-    all transformers versions).  Singleton pattern avoids
-    re-downloading on every request.
-    """
-    global _t5_model, _t5_tokenizer
-    if _t5_model is None:
-        from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
-
-        _t5_tokenizer = AutoTokenizer.from_pretrained("t5-small")
-        _t5_model = AutoModelForSeq2SeqLM.from_pretrained("t5-small")
-        
-        # Quantize the model dynamically to int8 to save ~70% RAM and speed up CPU inference on Render
-        import torch
-        _t5_model = torch.quantization.quantize_dynamic(
-            _t5_model, {torch.nn.Linear}, dtype=torch.qint8
-        )
-        
-        _t5_model.eval()
-    return _t5_model, _t5_tokenizer
-
 
 def abstractive_summarize(text: str) -> Dict:
     """
-    Abstractive summarisation using the T5-Small encoder-decoder
-    transformer.  The input is prefixed with "summarize: " as
-    mandated by the T5 architecture specification (PRD §5.2 Option B).
+    Abstractive summarisation using the T5-Small model via the 
+    Hugging Face Inference API. The input is prefixed with 
+    "summarize: " as mandated by the T5 architecture specification.
     """
-    import torch
-    torch.set_num_threads(1)
+    import os
+    import requests
 
     start = time.perf_counter()
-
     cleaned = clean_text(text)
-    model, tokenizer = _load_t5()
 
     # T5 prompt prefix as specified in the PRD
     input_text = f"summarize: {cleaned}"
 
-    # Tokenize with truncation for T5's 512-token context window
-    inputs = tokenizer(
-        input_text,
-        return_tensors="pt",
-        max_length=512,
-        truncation=True,
-    )
+    api_token = os.environ.get("HF_API_TOKEN")
+    if not api_token:
+        raise ValueError("HF_API_TOKEN environment variable is not set. Please add it to your environment or Render dashboard.")
 
-    # Generate summary tokens (no gradient computation needed)
-    with torch.no_grad():
-        output_ids = model.generate(
-            inputs.input_ids,
-            max_length=150,
-            min_length=30,
-            num_beams=1,
-            do_sample=False,
-        )
+    api_url = "https://api-inference.huggingface.co/models/google-t5/t5-small"
+    headers = {"Authorization": f"Bearer {api_token}"}
+    payload = {
+        "inputs": input_text,
+        "parameters": {
+            "max_length": 150,
+            "min_length": 30,
+            "do_sample": False
+        }
+    }
 
-    summary = tokenizer.decode(output_ids[0], skip_special_tokens=True)
+    response = requests.post(api_url, headers=headers, json=payload)
+    if response.status_code != 200:
+        raise RuntimeError(f"Hugging Face API Error: {response.status_code} - {response.text}")
+
+    result = response.json()
+    if isinstance(result, list) and len(result) > 0 and "summary_text" in result[0]:
+        summary = result[0]["summary_text"]
+    elif isinstance(result, list) and len(result) > 0 and "generated_text" in result[0]:
+        summary = result[0]["generated_text"]
+    else:
+        raise RuntimeError(f"Unexpected response format from HF API: {result}")
+
     elapsed = (time.perf_counter() - start) * 1000
 
     word_count_original = len(cleaned.split())
@@ -175,7 +153,7 @@ def abstractive_summarize(text: str) -> Dict:
     return {
         "summary": summary,
         "mode": "abstractive",
-        "model": "t5-small",
+        "model": "t5-small (HF API)",
         "inference_time_ms": round(elapsed, 2),
         "original_word_count": word_count_original,
         "summary_word_count": word_count_summary,

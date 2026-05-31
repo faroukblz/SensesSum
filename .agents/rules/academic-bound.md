@@ -1,5 +1,5 @@
 ---
-trigger: always_on
+trigger: manual
 ---
 
 Core Execution Constraints
@@ -11,6 +11,6 @@ Algorithm Boundary: Strictly limit the summarization selection to two manual eng
 
 Extractive Matrix Engine: Uses Scikit-Learn's standard TF-IDF values to rank sentence vectors.
 
-Abstractive Generative Engine: Uses the pre-trained t5-small architecture via Hugging Face pipeline wrappers (as referenced in Topic 5.2 of the syllabus). Do not use external API tokens or non-syllabus LLM layers.
+Abstractive Generative Engine: Uses the pre-trained t5-small architecture via Hugging Face pipeline wrappers (as referenced in Topic 5.2 of the syllabus). 
 
-Evaluation Module: Must run an isolated execution of the rouge-score package to print ROUGE-1 and ROUGE-L calculations alongside the generated text summaries for comparison.
+Evaluation Module: Must run an isolated execution of the rouge-score package to print ROUGE and BLEU calculations alongside the generated text summaries for comparison.
