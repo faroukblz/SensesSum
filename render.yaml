@@ -1,0 +1,28 @@
+services:
+  # FastAPI Backend Service
+  - type: web
+    name: sensessum-backend
+    env: python
+    rootDir: back
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "python -m uvicorn main:app --host 0.0.0.0 --port $PORT"
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.10.12 # Ensure compatibility with T5/Torch
+
+  # Next.js Frontend Service
+  - type: web
+    name: sensessum-frontend
+    env: node
+    rootDir: front
+    buildCommand: "npm install && npm run build"
+    startCommand: "npm run start"
+    envVars:
+      - key: NODE_VERSION
+        value: 20
+      # Automatically link the frontend to the backend's external URL
+      - key: NEXT_PUBLIC_API_URL
+        fromService:
+          type: web
+          name: sensessum-backend
+          envVarKey: RENDER_EXTERNAL_URL
