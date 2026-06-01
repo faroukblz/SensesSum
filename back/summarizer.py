@@ -120,7 +120,12 @@ def abstractive_summarize(text: str) -> Dict:
             "Please add it to your environment or Render dashboard."
         )
 
-    api_url = "https://api-inference.huggingface.co/models/google/pegasus-xsum"
+    # Try multiple HF endpoints – Render's DNS sometimes cannot
+    # resolve api-inference.huggingface.co, so we use fallbacks.
+    api_urls = [
+        "https://router.huggingface.co/hf-inference/models/google/pegasus-xsum",
+        "https://api-inference.huggingface.co/models/google/pegasus-xsum",
+    ]
     headers = {"Authorization": f"Bearer {api_token}"}
     payload = {
         "inputs": cleaned,
@@ -134,7 +139,20 @@ def abstractive_summarize(text: str) -> Dict:
         },
     }
 
-    response = requests.post(api_url, headers=headers, json=payload, timeout=120)
+    response = None
+    last_error = None
+    for url in api_urls:
+        try:
+            response = requests.post(url, headers=headers, json=payload, timeout=120)
+            break  # success – stop trying
+        except requests.exceptions.ConnectionError as e:
+            last_error = e
+            continue  # try next URL
+
+    if response is None:
+        raise RuntimeError(
+            f"Could not connect to any Hugging Face endpoint. Last error: {last_error}"
+        )
 
     if response.status_code != 200:
         raise RuntimeError(
