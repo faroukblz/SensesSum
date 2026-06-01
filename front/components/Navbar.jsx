@@ -13,17 +13,17 @@ export default function Navbar() {
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6, ease: "easeOut" }}
-      className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-8 py-5 bg-white border-b border-gray-200"
+      className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-8 py-5 bg-white/40 backdrop-blur-md border-b border-white/40"
     >
       {/* ── Brand ─────────────────────────── */}
       <div className="flex items-center gap-2.5">
         <BrandLogo />
         <div className="leading-tight">
           <span className="text-sm font-semibold tracking-tight text-gray-900">
-            Pulsar.AI
+            SensesSum
           </span>
           <span className="text-[0.65rem] font-medium block -mt-0.5 text-gray-500">
-            Summarization
+            Innovations
           </span>
         </div>
       </div>
@@ -49,7 +49,7 @@ export default function Navbar() {
           Have A Question?
         </span>
         <button
-          className="text-sm font-medium px-5 py-2.5 rounded-full transition-all duration-300 bg-gray-900 text-white hover:bg-black hover:-translate-y-[1px]"
+          className="btn-primary-pill px-6 py-2.5 text-sm font-medium"
         >
           Book A Call
         </button>
@@ -62,10 +62,10 @@ export default function Navbar() {
 function BrandLogo() {
   return (
     <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
-      <circle cx="14" cy="8" r="3" fill="#111827" />
-      <circle cx="8" cy="18" r="3" fill="#6B7280" />
-      <circle cx="20" cy="18" r="3" fill="#9CA3AF" />
-      <circle cx="14" cy="14" r="2" fill="#374151" />
+      <circle cx="14" cy="8" r="3" fill="#6c5ce7" opacity="0.9" />
+      <circle cx="8" cy="18" r="3" fill="#a29bfe" opacity="0.7" />
+      <circle cx="20" cy="18" r="3" fill="#c5baf2" opacity="0.7" />
+      <circle cx="14" cy="14" r="2" fill="#6c5ce7" opacity="0.5" />
     </svg>
   );
 }
