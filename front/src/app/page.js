@@ -6,6 +6,7 @@
    ═══════════════════════════════════════════════════ */
 
 import { useState, useCallback, lazy, Suspense } from "react";
+import { motion } from "framer-motion";
 import Navbar from "@/components/Navbar";
 
 // Lazy-load the heavy 3D component so it doesn't block first paint
