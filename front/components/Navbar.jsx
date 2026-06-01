@@ -13,19 +13,14 @@ export default function Navbar() {
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6, ease: "easeOut" }}
-      className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-8 py-5 bg-white/40 backdrop-blur-md border-b border-white/40"
+      className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-8 py-4 bg-[#18181B] border-b border-gray-800"
     >
       {/* ── Brand ─────────────────────────── */}
-      <div className="flex items-center gap-2.5">
+      <div className="flex items-center gap-3">
         <BrandLogo />
-        <div className="leading-tight">
-          <span className="text-sm font-semibold tracking-tight text-gray-900">
-            SensesSum
-          </span>
-          <span className="text-[0.65rem] font-medium block -mt-0.5 text-gray-500">
-            Innovations
-          </span>
-        </div>
+        <span className="text-lg font-bold tracking-tight text-white">
+          SensesSum
+        </span>
       </div>
 
       {/* ── Nav Links ─────────────────────── */}
@@ -34,38 +29,37 @@ export default function Navbar() {
           <a
             key={item}
             href="#"
-            className="text-sm font-medium text-gray-500 transition-colors duration-200 hover:text-gray-900"
+            className="text-sm font-medium text-gray-300 transition-colors duration-200 hover:text-white"
           >
             {item}
           </a>
         ))}
       </div>
 
-      {/* ── CTA ───────────────────────────── */}
+      {/* ── Auth Actions ──────────────────── */}
       <div className="flex items-center gap-4">
-        <span
-          className="hidden sm:inline text-sm text-gray-500"
-        >
-          Have A Question?
-        </span>
         <button
-          className="px-6 py-2.5 text-sm font-medium text-white bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full shadow-[0_4px_14px_0_rgba(79,70,229,0.39)] hover:-translate-y-px hover:shadow-[0_6px_20px_rgba(79,70,229,0.23)] transition-all whitespace-nowrap"
+          className="px-5 py-2 text-sm font-medium text-white bg-transparent border border-gray-600 rounded-full hover:border-white transition-colors whitespace-nowrap"
         >
-          Book A Call
+          Log in
+        </button>
+        <button
+          className="px-5 py-2 text-sm font-bold text-gray-900 bg-cyan-400 rounded-full hover:bg-cyan-300 transition-colors whitespace-nowrap"
+        >
+          Sign up
         </button>
       </div>
     </motion.nav>
   );
 }
 
-/* ── SVG Brand Logo (abstract multi-axis dot) ───── */
+/* ── SVG Brand Logo (Minimalist Cyan) ───── */
 function BrandLogo() {
   return (
-    <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
-      <circle cx="14" cy="8" r="3" fill="#6c5ce7" opacity="0.9" />
-      <circle cx="8" cy="18" r="3" fill="#a29bfe" opacity="0.7" />
-      <circle cx="20" cy="18" r="3" fill="#c5baf2" opacity="0.7" />
-      <circle cx="14" cy="14" r="2" fill="#6c5ce7" opacity="0.5" />
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+      <rect x="2" y="2" width="8" height="8" rx="2" fill="#00E5FF" />
+      <rect x="14" y="2" width="8" height="8" rx="2" fill="#00E5FF" opacity="0.5" />
+      <rect x="2" y="14" width="8" height="8" rx="2" fill="#00E5FF" opacity="0.2" />
     </svg>
   );
 }

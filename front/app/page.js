@@ -1,301 +1,229 @@
 "use client";
 
-/* ═══════════════════════════════════════════════════
-   SensesSum – Main Page
-   PRD §6.3 : Hero + Workspace + Results
-   ═══════════════════════════════════════════════════ */
-
-import { useState, useCallback, lazy, Suspense } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import Navbar from "@/components/Navbar";
 
-// Lazy-load the heavy 3D component so it doesn't block first paint
-const Ring3D = lazy(() => import("@/components/Ring3D"));
-
-const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-
 export default function Home() {
-  // ── State ──────────────────────────────────────
   const [text, setText] = useState("");
-  const [mode, setMode] = useState("extractive"); // "extractive" | "abstractive"
-  const [ringState, setRingState] = useState("idle"); // "idle" | "processing" | "done"
-  const [result, setResult] = useState(null);
-  const [rougeScores, setRougeScores] = useState(null);
+  const [mode, setMode] = useState("extractive");
   const [loading, setLoading] = useState(false);
+  const [result, setResult] = useState(null);
   const [preprocessData, setPreprocessData] = useState(null);
+  const [rougeScores, setRougeScores] = useState(null);
 
-  // ── Summarize Handler ──────────────────────────
-  const handleSummarize = useCallback(async () => {
-    if (!text.trim() || loading) return;
+  // Poll preprocessing endpoint while processing
+  useEffect(() => {
+    let interval;
+    if (loading && text) {
+      interval = setInterval(async () => {
+        try {
+          const res = await fetch("https://sensessum-back.onrender.com/preprocess", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ text }),
+          });
+          if (res.ok) {
+            const data = await res.json();
+            setPreprocessData(data);
+          }
+        } catch (error) {
+          console.error("Polling error:", error);
+        }
+      }, 1500);
+    } else {
+      setPreprocessData(null);
+    }
+    return () => clearInterval(interval);
+  }, [loading, text]);
 
+  const handleSummarize = async () => {
+    if (!text.trim()) return;
     setLoading(true);
-    setRingState("processing");
     setResult(null);
     setRougeScores(null);
+    setPreprocessData(null);
 
     try {
-      // Fire preprocess + summarize in parallel
-      const [prepRes, sumRes] = await Promise.all([
-        fetch(`${API}/api/preprocess`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ text }),
+      const res = await fetch("https://sensessum-back.onrender.com/summarize", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text, model_type: mode }),
+      });
+      const data = await res.json();
+      setResult(data);
+
+      const rougeRes = await fetch("https://sensessum-back.onrender.com/evaluate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          original_text: text,
+          summary_text: data.summary,
         }),
-        fetch(`${API}/api/summarize`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ text, mode }),
-        }),
-      ]);
-
-      const prepData = await prepRes.json();
-      const sumData = await sumRes.json();
-
-      setPreprocessData(prepData.data);
-      setResult(sumData.data);
-      setRingState("done");
-
-      // Automate ROUGE calculation using the original text as the reference
-      if (sumData?.data?.summary) {
-        fetch(`${API}/api/evaluate`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            generated_summary: sumData.data.summary,
-            reference_summary: text,
-          }),
-        })
-          .then((res) => res.json())
-          .then((rData) => setRougeScores(rData.data))
-          .catch((err) => console.error("ROUGE Error:", err));
+      });
+      if (rougeRes.ok) {
+        const rougeData = await rougeRes.json();
+        setRougeScores(rougeData.scores);
       }
-
-      // Ease back to idle after 2s
-      setTimeout(() => setRingState("idle"), 2000);
-    } catch (err) {
-      console.error("API Error:", err);
-      setRingState("idle");
+    } catch (error) {
+      console.error("Summarization failed:", error);
     } finally {
       setLoading(false);
     }
-  }, [text, mode, loading]);
+  };
 
   return (
     <>
       <Navbar />
 
-      {/* ═══ Main Content ═══ */}
-      <main 
-        className="relative z-10 min-h-screen px-4 md:px-10 lg:px-16 pb-24 max-w-[1500px] mx-auto w-full flex flex-col"
-        style={{ paddingTop: '9rem' }}
-      >
+      <main className="bg-dot-pattern relative min-h-screen pt-[104px] pb-24 w-full flex flex-col items-center">
         
-        {/* 1. Hero Text */}
-        <div className="mb-12">
-          <h1 className="text-5xl md:text-6xl font-extrabold tracking-tight text-gray-900 leading-tight">
-            Distraction-Free <br/>
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-indigo-600">
-              Intelligent Summarization
-            </span>
+        {/* ── Typography Hero ── */}
+        <div className="w-full px-6 flex flex-col items-center text-center mt-12 mb-12">
+          <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight text-gray-900 mb-4">
+            Summarize AI text
           </h1>
-          <p className="mt-4 text-lg text-gray-600 max-w-2xl">
-            Paste your long research paragraphs into the tool and receive a high-level summary instantly in a polished, cognitively soothing environment.
+          <p className="text-gray-500 max-w-3xl text-lg md:text-xl">
+            Transform lengthy research and articles into precise, high-level summaries instantly. Choose between Extractive TF-IDF and Abstractive PEGASUS engines.
           </p>
         </div>
 
-        {/* 2. Main Workspace "Window" */}
-        <div className="w-full bg-white/40 backdrop-blur-3xl rounded-[2.5rem] shadow-[0_8px_40px_rgba(0,0,0,0.04)] border border-white/50 overflow-hidden">
-          <div className="grid grid-cols-1 lg:grid-cols-2">
-            
-            {/* ── LEFT COLUMN (Input & Controls) ── */}
-            <div className="p-8 md:p-12 flex flex-col space-y-8 relative z-10">
-              
-              <div className="flex bg-gray-100 p-1.5 rounded-full border border-gray-200 shadow-sm self-start">
-                <button
-                  className={`px-6 py-2.5 rounded-full text-sm font-medium transition-all ${mode === "extractive" ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-700"}`}
-                  onClick={() => setMode("extractive")}
-                >
-                  Extractive Matrix
-                </button>
-                <button
-                  className={`px-6 py-2.5 rounded-full text-sm font-medium transition-all ${mode === "abstractive" ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-700"}`}
-                  onClick={() => setMode("abstractive")}
-                >
-                  Abstractive PEGASUS
-                </button>
-              </div>
+        {/* ── Main Split-Pane Workspace ── */}
+        <div className="w-full max-w-7xl px-4 md:px-8">
+          
+          {/* Segmented Controls (Top Bar) */}
+          <div className="w-full bg-white border border-gray-200 rounded-t-xl flex items-center px-2 pt-2 gap-2 overflow-hidden">
+            <button
+              onClick={() => setMode("extractive")}
+              className={`px-6 py-3 text-sm font-semibold transition-all border-b-2 ${
+                mode === "extractive"
+                  ? "border-[#00E5FF] text-[#00E5FF]"
+                  : "border-transparent text-gray-500 hover:text-gray-900"
+              }`}
+            >
+              Extractive (TF-IDF)
+            </button>
+            <button
+              onClick={() => setMode("abstractive")}
+              className={`px-6 py-3 text-sm font-semibold transition-all border-b-2 ${
+                mode === "abstractive"
+                  ? "border-[#00E5FF] text-[#00E5FF]"
+                  : "border-transparent text-gray-500 hover:text-gray-900"
+              }`}
+            >
+              Abstractive (PEGASUS)
+            </button>
+          </div>
 
+          {/* Grid Layout Container */}
+          <div className="w-full bg-white border-x border-b border-gray-200 rounded-b-xl grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-gray-200 shadow-sm overflow-hidden">
+            
+            {/* Left Pane: Input */}
+            <div className="flex flex-col relative h-[500px]">
               <textarea
-                id="input-text"
                 value={text}
                 onChange={(e) => setText(e.target.value)}
-                className="w-full min-h-[300px] p-6 rounded-3xl bg-white border border-gray-200 shadow-inner focus:ring-2 focus:ring-indigo-300 outline-none resize-y text-gray-800 text-lg leading-relaxed transition-all placeholder-gray-400"
-                placeholder="Paste your long text here to automate your reading workflow…"
-                rows={8}
+                placeholder="Paste your long text here..."
+                className="flex-1 w-full p-8 text-gray-800 text-lg leading-relaxed resize-none focus:outline-none placeholder-gray-400 bg-transparent"
               />
-
-              <button
-                className="px-10 py-4 w-fit flex items-center justify-center gap-3 text-lg font-medium text-white bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full shadow-[0_4px_14px_0_rgba(79,70,229,0.39)] hover:-translate-y-px hover:shadow-[0_6px_20px_rgba(79,70,229,0.23)] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                onClick={handleSummarize}
-                disabled={loading || !text.trim()}
-              >
-                {loading ? (
-                  <>
-                    <span className="spinner" />
-                    Processing Pipeline…
-                  </>
-                ) : (
-                  <>
-                    <svg width="20" height="20" viewBox="0 0 16 16" fill="none" className="mr-1">
-                      <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
-                    Summarize
-                  </>
-                )}
-              </button>
+              <div className="absolute bottom-6 left-8">
+                <button
+                  onClick={handleSummarize}
+                  disabled={loading || !text.trim()}
+                  className="flex items-center gap-2 px-6 py-2.5 bg-white border border-gray-300 text-gray-900 text-sm font-bold rounded-lg shadow-sm hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {loading ? (
+                    <>
+                      <span className="spinner w-4 h-4 border-[#00E5FF]" />
+                      Processing...
+                    </>
+                  ) : (
+                    <>
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-[#00E5FF]"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                      Summarize
+                    </>
+                  )}
+                </button>
+              </div>
             </div>
 
-            {/* ── RIGHT COLUMN (Floating Elements & Analytics) ── */}
-            <div className="p-8 md:p-12 bg-cyan-grid border-l border-white/30 flex flex-col space-y-10 relative">
+            {/* Right Pane: Outputs */}
+            <div className="flex flex-col h-[500px] overflow-y-auto bg-gray-50">
               
-              {/* Floating Summary Card */}
-              <motion.div 
-                animate={{ y: [0, -6, 0] }} 
-                transition={{ repeat: Infinity, duration: 4, ease: "easeInOut" }} 
-                className="glass-card-v2 p-8"
-              >
-                <div className="flex items-center justify-between border-b border-gray-200 pb-3 mb-4">
-                  <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-                    <div className="w-2.5 h-2.5 rounded-full bg-indigo-500" />
-                    Generated Summary
-                  </h2>
-                </div>
+              {/* Output 1: Generated Summary */}
+              <div className="flex-1 p-8 border-b border-gray-200">
+                <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4 flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full bg-[#00E5FF]" />
+                  Generated Summary
+                </h3>
                 {result ? (
-                  <p className="text-gray-800 leading-relaxed text-[0.95rem]">
+                  <p className="text-gray-900 text-[0.95rem] leading-relaxed">
                     {result.summary}
                   </p>
                 ) : (
-                  <div className="flex flex-col items-center justify-center h-24">
-                    <span className="text-gray-400 font-medium text-sm">Your summary will appear here</span>
-                  </div>
+                  <p className="text-gray-400 text-sm italic">Your summary will appear here.</p>
                 )}
-              </motion.div>
+              </div>
 
-              {/* Floating Pipeline Inspector */}
-              <motion.div 
-                animate={{ y: [0, -6, 0] }} 
-                transition={{ repeat: Infinity, duration: 5, ease: "easeInOut", delay: 0.5 }} 
-                className="glass-card-v2 p-8"
-              >
-                <div className="flex items-center justify-between border-b border-gray-200 pb-3 mb-4">
-                  <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-blue-500"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
-                    Pipeline Inspector
-                  </h2>
-                </div>
-                
+              {/* Output 2: Pipeline Inspector */}
+              <div className="p-8">
+                <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4 flex items-center gap-2">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-[#00E5FF]"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+                  Pipeline Inspector
+                </h3>
                 {preprocessData ? (
-                  <div className="space-y-4">
-                    <div>
-                      <p className="text-[0.65rem] font-bold uppercase tracking-widest mb-2 text-gray-500">
-                        Filtered tokens:
-                      </p>
-                      <div className="flex flex-wrap gap-1.5">
-                        {preprocessData.filtered_tokens?.slice(0, 15).map((tok, i) => (
-                          <span key={i} className="text-[0.7rem] px-2 py-0.5 rounded bg-gray-100 text-gray-700 border border-gray-200">
-                            {tok}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
+                  <div className="flex flex-wrap gap-2">
+                    {preprocessData.filtered_tokens?.slice(0, 20).map((tok, i) => (
+                      <span key={i} className="text-xs px-2 py-1 bg-white border border-gray-200 text-gray-600 rounded">
+                        {tok}
+                      </span>
+                    ))}
+                    {preprocessData.filtered_tokens?.length > 20 && (
+                      <span className="text-xs px-2 py-1 text-gray-400">+{preprocessData.filtered_tokens.length - 20} more</span>
+                    )}
                   </div>
                 ) : (
-                  <div className="flex flex-col items-center justify-center h-20">
-                    <span className="text-gray-400 font-medium text-sm">Awaiting pipeline data...</span>
-                  </div>
+                  <p className="text-gray-400 text-sm italic">Awaiting pipeline data...</p>
                 )}
-              </motion.div>
+              </div>
 
             </div>
           </div>
-        </div>
-
-        {/* 3. Minimalist Analytics Scoreboard (Below Fold) */}
-        {result && (
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="mt-10 grid grid-cols-2 md:grid-cols-5 gap-6"
-          >
-            <ScoreboardMetric label="Inference Time" value={`${result.inference_time_ms?.toFixed(0)} ms`} />
-            <ScoreboardMetric label="Compression" value={`${result.compression_ratio?.toFixed(1)}%`} />
-            <ScoreboardMetric label="Words" value={result.summary?.split(/\s+/).length} />
-            
-            <div className="col-span-2 grid grid-cols-2 gap-6">
+          
+          {/* ── Performance Metrics Footer ── */}
+          {result && (
+            <motion.div 
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="w-full mt-6 bg-white border border-gray-200 rounded-xl p-6 grid grid-cols-2 md:grid-cols-4 gap-6 divide-x divide-gray-100 shadow-sm"
+            >
+              <ScoreboardMetric label="Inference Time" value={`${result.inference_time_ms?.toFixed(0)} ms`} />
+              <ScoreboardMetric label="Compression" value={`${result.compression_ratio?.toFixed(1)}%`} />
+              
               {rougeScores ? (
                 <>
                   <ScoreboardMetric label="ROUGE-1 F1" value={`${(rougeScores.rouge_1.f1 * 100).toFixed(1)}%`} />
                   <ScoreboardMetric label="ROUGE-L F1" value={`${(rougeScores.rouge_l.f1 * 100).toFixed(1)}%`} />
                 </>
               ) : (
-                <ScoreboardMetric label="ROUGE Evaluation" value="..." />
+                <div className="col-span-2 flex items-center justify-center text-gray-400 text-sm">
+                  Computing ROUGE...
+                </div>
               )}
-            </div>
-          </motion.div>
-        )}
+            </motion.div>
+          )}
 
+        </div>
       </main>
     </>
   );
 }
 
-/* ── UI Helper Components ────────────────────────── */
-
 function ScoreboardMetric({ label, value }) {
   return (
-    <div className="glass-card-v2 p-6 flex flex-col items-center justify-center text-center">
-      <div className="text-3xl md:text-4xl font-extrabold text-indigo-600 mb-2">{value}</div>
+    <div className="flex flex-col pl-6 first:pl-0">
+      <div className="text-2xl font-extrabold text-gray-900 mb-1">{value}</div>
       <div className="text-[0.65rem] font-bold uppercase tracking-widest text-gray-500">{label}</div>
-    </div>
-  );
-}
-
-function MetricCard({ label, value }) {
-  return (
-    <div className="bg-white p-4 rounded-2xl border border-gray-200 shadow-sm text-center flex flex-col justify-center">
-      <div className="font-bold text-xl text-gray-900">{value}</div>
-      <div className="text-[0.7rem] font-bold uppercase tracking-widest text-gray-500 mt-1.5">{label}</div>
-    </div>
-  );
-}
-
-function PipelineStat({ label, value }) {
-  return (
-    <div className="bg-white p-4 rounded-2xl border border-gray-200 shadow-sm text-center flex flex-col justify-center">
-      <div className="font-bold text-2xl text-gray-900">{value}</div>
-      <div className="text-[0.65rem] font-bold uppercase tracking-widest text-gray-500 mt-1.5 leading-tight">{label}</div>
-    </div>
-  );
-}
-
-function RougeMetric({ label, scores }) {
-  return (
-    <div className="space-y-2">
-      <div className="flex items-center justify-between">
-        <span className="text-[0.75rem] font-bold uppercase tracking-widest text-gray-800">
-          {label}
-        </span>
-        <span className="text-sm font-bold text-gray-900">
-          F1: {(scores.f1 * 100).toFixed(1)}%
-        </span>
-      </div>
-      <div className="rouge-bar-track">
-        <div className="rouge-bar-fill" style={{ width: `${scores.f1 * 100}%` }} />
-      </div>
-      <div className="flex justify-between text-xs font-medium text-gray-500">
-        <span>P: {(scores.precision * 100).toFixed(1)}%</span>
-        <span>R: {(scores.recall * 100).toFixed(1)}%</span>
-      </div>
     </div>
   );
 }
