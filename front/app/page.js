@@ -299,12 +299,3 @@ function RougeMetric({ label, scores }) {
     </div>
   );
 }
-
-function ScoreboardMetric({ label, value }) {
-  return (
-    <div className="flex flex-col">
-      <div className="text-3xl md:text-4xl font-extrabold text-gray-900 mb-1">{value}</div>
-      <div className="text-[0.65rem] font-bold uppercase tracking-widest text-gray-500">{label}</div>
-    </div>
-  );
-}
