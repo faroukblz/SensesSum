@@ -2,7 +2,7 @@
 # SensesSum – Backend : Summarization Engines
 # Syllabus Alignment :
 #   • Extractive  → Chapter IV (TF-IDF) & Chapter VI §6.1
-#   • Abstractive → Chapter VI §6.4/6.5 (T5 Architecture)
+#   • Abstractive → Chapter VI §6.4/6.5 (PEGASUS Architecture)
 #
 # Engine selection is driven by a single `mode` toggle
 # parameter ("extractive" | "abstractive") exactly as
@@ -96,25 +96,22 @@ def extractive_summarize(text: str, num_sentences: int = 3) -> Dict:
 
 
 # ═══════════════════════════════════════════
-# Abstractive Engine (Hugging Face API)
-# Syllabus Chapters VI.4 / VI.5.2 (Modified for HF API)
+# Abstractive Engine (PEGASUS via Hugging Face API)
+# Syllabus Chapters VI.4 / VI.5.2
 # ═══════════════════════════════════════════
 
 def abstractive_summarize(text: str) -> Dict:
     """
-    Abstractive summarisation using the T5-Small model via the
-    Hugging Face Inference API (huggingface_hub client).
-    The input is prefixed with "summarize: " as mandated by the
-    T5 architecture specification.
+    Abstractive summarisation using the PEGASUS transformer
+    (google/pegasus-xsum) via the Hugging Face Inference API.
+    PEGASUS is purpose-built for abstractive summarisation
+    using Gap Sentence Generation (GSG) pre-training.
     """
     import os
-    from huggingface_hub import InferenceClient
+    import requests
 
     start = time.perf_counter()
     cleaned = clean_text(text)
-
-    # T5 prompt prefix as specified in the PRD
-    input_text = f"summarize: {cleaned}"
 
     api_token = os.environ.get("HF_API_TOKEN")
     if not api_token:
@@ -123,20 +120,34 @@ def abstractive_summarize(text: str) -> Dict:
             "Please add it to your environment or Render dashboard."
         )
 
-    client = InferenceClient(
-        model="google-t5/t5-small",
-        token=api_token,
-    )
+    api_url = "https://api-inference.huggingface.co/models/google/pegasus-xsum"
+    headers = {"Authorization": f"Bearer {api_token}"}
+    payload = {
+        "inputs": cleaned,
+        "parameters": {
+            "max_length": 150,
+            "min_length": 30,
+            "do_sample": False,
+        },
+        "options": {
+            "wait_for_model": True,
+        },
+    }
 
-    result = client.summarization(input_text)
+    response = requests.post(api_url, headers=headers, json=payload, timeout=120)
 
-    # Extract the summary text from the response
-    if hasattr(result, "summary_text"):
-        summary = result.summary_text
+    if response.status_code != 200:
+        raise RuntimeError(
+            f"Hugging Face API Error: {response.status_code} - {response.text}"
+        )
+
+    result = response.json()
+    if isinstance(result, list) and len(result) > 0 and "summary_text" in result[0]:
+        summary = result[0]["summary_text"]
+    elif isinstance(result, list) and len(result) > 0 and "generated_text" in result[0]:
+        summary = result[0]["generated_text"]
     elif isinstance(result, dict) and "summary_text" in result:
         summary = result["summary_text"]
-    elif isinstance(result, str):
-        summary = result
     else:
         raise RuntimeError(f"Unexpected response format from HF API: {result}")
 
@@ -151,7 +162,7 @@ def abstractive_summarize(text: str) -> Dict:
     return {
         "summary": summary,
         "mode": "abstractive",
-        "model": "t5-small (HF API)",
+        "model": "pegasus-xsum (HF API)",
         "inference_time_ms": round(elapsed, 2),
         "original_word_count": word_count_original,
         "summary_word_count": word_count_summary,

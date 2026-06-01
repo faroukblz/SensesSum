@@ -3,7 +3,7 @@
 # ──────────────────────────────────────────────────────────────
 # Routes:
 #   POST /api/preprocess   → Chapter II text-cleaning pipeline
-#   POST /api/summarize    → Toggle: extractive (TF-IDF) | abstractive (T5)
+#   POST /api/summarize    → Toggle: extractive (TF-IDF) | abstractive (PEGASUS)
 #   POST /api/evaluate     → ROUGE-1 & ROUGE-L scoring
 #
 # Serves on http://localhost:8000 with CORS enabled for the
@@ -29,7 +29,7 @@ app = FastAPI(
     description=(
         "Syllabus-compliant backend for the SensesSum text "
         "summarization platform.  Implements preprocessing "
-        "(Chapter II), TF-IDF extractive & T5 abstractive "
+        "(Chapter II), TF-IDF extractive & PEGASUS abstractive "
         "summarization (Chapters IV/VI), and ROUGE evaluation "
         "(Chapter VI §6.6)."
     ),
@@ -64,7 +64,7 @@ class SummarizeRequest(BaseModel):
     )
     mode: Literal["extractive", "abstractive"] = Field(
         default="extractive",
-        description="Toggle between extractive (TF-IDF) and abstractive (T5-Small).",
+        description="Toggle between extractive (TF-IDF) and abstractive (PEGASUS).",
     )
     num_sentences: Optional[int] = Field(
         default=3,
@@ -128,8 +128,8 @@ async def summarize(req: SummarizeRequest):
     Toggle parameter `mode`:
     • `"extractive"` → scores sentences using a manual TF-IDF
       matrix computation (Scikit-Learn).
-    • `"abstractive"` → calls the Hugging Face T5-Small model
-      with the prefix `"summarize: "`.
+    • `"abstractive"` → calls the Hugging Face PEGASUS model
+      (google/pegasus-xsum) for abstractive summarisation.
     """
     try:
         if req.mode == "extractive":

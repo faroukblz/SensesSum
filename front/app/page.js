@@ -177,7 +177,7 @@ export default function Home() {
                   className={mode === "abstractive" ? "active" : ""}
                   onClick={() => setMode("abstractive")}
                 >
-                  Abstractive T5
+                  Abstractive PEGASUS
                 </button>
               </div>
 

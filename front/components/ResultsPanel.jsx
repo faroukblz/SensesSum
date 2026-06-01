@@ -54,7 +54,7 @@ export default function ResultsPanel({ result, rougeScores, onEvaluate }) {
                   Generated Summary
                 </h3>
                 <span className="badge-beta ml-auto">
-                  {result.mode === "extractive" ? "TF-IDF Extractive" : "T5 Abstractive"}
+                  {result.mode === "extractive" ? "TF-IDF Extractive" : "PEGASUS Abstractive"}
                 </span>
               </div>
 
