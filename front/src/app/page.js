@@ -95,15 +95,14 @@ export default function Home() {
       <Navbar />
 
       {/* ═══ Main Content ═══ */}
-      <main className="relative z-10 min-h-screen flex flex-col items-start justify-center px-6 md:px-16 pt-24 pb-12">
+      <main className="relative z-10 min-h-screen flex flex-col items-center justify-start px-6 md:px-16 pt-32 pb-24 gap-12">
         {/* ── Hero Section ────────────────── */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, delay: 0.2, ease: "easeOut" }}
-          className="max-w-2xl w-full space-y-6"
-        >
-          {/* Beta badge */}
+          className="max-w-3xl w-full space-y-6 flex flex-col items-center text-center"
+        >  {/* Beta badge */}
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
@@ -148,7 +147,7 @@ export default function Home() {
           initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, delay: 0.5, ease: "easeOut" }}
-          className="w-full max-w-2xl mt-8"
+          className="w-full max-w-3xl"
         >
           <div className="glass-card-solid p-6 md:p-8 space-y-5">
             {/* Text area */}
@@ -233,7 +232,7 @@ export default function Home() {
               animate={{ opacity: 1, height: "auto" }}
               exit={{ opacity: 0, height: 0 }}
               transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}
-              className="w-full max-w-2xl mt-4 overflow-hidden"
+              className="w-full max-w-3xl mt-4 overflow-hidden"
             >
               <div className="glass-card p-6 space-y-4">
                 <h3

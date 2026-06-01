@@ -133,6 +133,13 @@ export default function ResultsPanel({ result, rougeScores, onEvaluate }) {
                     transition={{ duration: 0.4 }}
                     className="space-y-4 pt-2"
                   >
+                    <div className="text-xs space-y-1 mb-4" style={{ color: "var(--text-secondary)" }}>
+                      <p><strong>ROUGE-1</strong> measures exact word overlap.</p>
+                      <p><strong>ROUGE-L</strong> measures sentence structure overlap.</p>
+                      <p className="mt-1" style={{ color: "var(--text-muted)", fontSize: "0.7rem" }}>
+                        <em>* Higher F1 is better (max 100%). P = Precision, R = Recall.</em>
+                      </p>
+                    </div>
                     <RougeMetric label="ROUGE-1" scores={rougeScores.rouge_1} />
                     <RougeMetric label="ROUGE-L" scores={rougeScores.rouge_l} />
                   </motion.div>
