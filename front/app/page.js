@@ -22,8 +22,6 @@ export default function Home() {
   const [rougeScores, setRougeScores] = useState(null);
   const [loading, setLoading] = useState(false);
   const [preprocessData, setPreprocessData] = useState(null);
-  const [refText, setRefText] = useState("");
-  const [evaluating, setEvaluating] = useState(false);
 
   // ── Summarize Handler ──────────────────────────
   const handleSummarize = useCallback(async () => {
@@ -56,6 +54,21 @@ export default function Home() {
       setResult(sumData.data);
       setRingState("done");
 
+      // Automate ROUGE calculation using the original text as the reference
+      if (sumData?.data?.summary) {
+        fetch(`${API}/api/evaluate`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            generated_summary: sumData.data.summary,
+            reference_summary: text,
+          }),
+        })
+          .then((res) => res.json())
+          .then((rData) => setRougeScores(rData.data))
+          .catch((err) => console.error("ROUGE Error:", err));
+      }
+
       // Ease back to idle after 2s
       setTimeout(() => setRingState("idle"), 2000);
     } catch (err) {
@@ -65,26 +78,6 @@ export default function Home() {
       setLoading(false);
     }
   }, [text, mode, loading]);
-
-  // ── ROUGE Evaluate Handler ─────────────────────
-  const handleEvaluate = useCallback(async () => {
-    if (!refText.trim() || !result?.summary) return;
-    setEvaluating(true);
-    try {
-      const res = await fetch(`${API}/api/evaluate`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          generated_summary: result.summary,
-          reference_summary: refText,
-        }),
-      });
-      const data = await res.json();
-      setRougeScores(data.data);
-    } finally {
-      setEvaluating(false);
-    }
-  }, [refText, result?.summary]);
 
   return (
     <>
@@ -100,20 +93,20 @@ export default function Home() {
       <Navbar />
 
       {/* ═══ Main Content ═══ */}
-      <main className="relative z-10 min-h-screen px-4 md:px-10 lg:px-16 pt-24 pb-24 max-w-[1500px] mx-auto w-full flex flex-col items-center">
+      <main className="relative z-10 min-h-screen px-4 md:px-10 lg:px-16 pt-32 pb-24 max-w-[1400px] mx-auto w-full flex flex-col mt-8">
         
         {/* Header Titles */}
-        <div className="w-full mb-10 flex flex-col md:flex-row md:items-end justify-between gap-4">
-          <div>
-            <h1 className="heading-display text-4xl md:text-5xl" style={{ color: "var(--text-primary)" }}>
+        <div className="w-full mb-12 flex flex-col md:flex-row md:items-end justify-between gap-6 px-4">
+          <div className="space-y-3">
+            <h1 className="heading-display text-4xl md:text-5xl font-extrabold tracking-tight" style={{ color: "var(--text-primary)" }}>
               Create New Summary
             </h1>
-            <p className="mt-2 text-sm md:text-base text-gray-600 max-w-lg">
+            <p className="text-sm md:text-base text-gray-600 max-w-xl leading-relaxed">
               Syllabus-aligned NLP pipeline supporting TF-IDF extractive and PEGASUS abstractive modes.
             </p>
           </div>
-          <div className="flex gap-2">
-            <span className="badge-beta bg-white/50 backdrop-blur-sm shadow-sm border border-white/40">
+          <div className="flex gap-2 pb-2">
+            <span className="badge-beta bg-white/70 backdrop-blur-md shadow-sm border border-white/60 px-4 py-2 text-sm rounded-full">
               <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
                 <circle cx="6" cy="6" r="5" stroke="#6c5ce7" strokeWidth="1.5" fill="none" />
                 <circle cx="6" cy="6" r="2" fill="#6c5ce7" />
@@ -124,36 +117,36 @@ export default function Home() {
         </div>
 
         {/* Dashboard Main Container */}
-        <div className="glass-card-solid w-full p-6 md:p-8 rounded-2xl shadow-xl overflow-hidden">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-14">
+        <div className="bg-white/80 backdrop-blur-xl border border-white/50 w-full p-8 md:p-12 rounded-[2rem] shadow-2xl shadow-indigo-500/10">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16">
             
             {/* ── LEFT COLUMN ── */}
-            <div className="flex flex-col space-y-10">
+            <div className="flex flex-col space-y-12">
               
               {/* 1. Input Workspace */}
-              <section className="space-y-4">
-                <h2 className="text-lg font-semibold heading-display" style={{ color: "var(--text-primary)" }}>
+              <section className="space-y-6">
+                <h2 className="text-xl font-bold heading-display border-b border-gray-200 pb-3" style={{ color: "var(--text-primary)" }}>
                   Source Document
                 </h2>
                 <textarea
                   id="input-text"
                   value={text}
                   onChange={(e) => setText(e.target.value)}
-                  className="text-input shadow-inner bg-white/60"
+                  className="w-full min-h-[220px] p-6 rounded-2xl bg-white border border-gray-100 shadow-sm focus:ring-2 focus:ring-indigo-100 focus:border-indigo-300 outline-none resize-y text-gray-700 leading-relaxed transition-all"
                   placeholder="Paste your long text here to automate your reading workflow…"
-                  rows={7}
+                  rows={8}
                 />
 
-                <div className="flex flex-wrap items-center justify-between gap-4 pt-2">
-                  <div className="toggle-pill shadow-sm">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-2">
+                  <div className="flex bg-gray-100/80 p-1.5 rounded-full border border-gray-200/50">
                     <button
-                      className={mode === "extractive" ? "active" : ""}
+                      className={`px-6 py-2.5 rounded-full text-sm font-medium transition-all ${mode === "extractive" ? "bg-white text-indigo-700 shadow-sm" : "text-gray-500 hover:text-gray-700"}`}
                       onClick={() => setMode("extractive")}
                     >
                       Extractive Matrix
                     </button>
                     <button
-                      className={mode === "abstractive" ? "active" : ""}
+                      className={`px-6 py-2.5 rounded-full text-sm font-medium transition-all ${mode === "abstractive" ? "bg-white text-indigo-700 shadow-sm" : "text-gray-500 hover:text-gray-700"}`}
                       onClick={() => setMode("abstractive")}
                     >
                       Abstractive PEGASUS
@@ -161,7 +154,7 @@ export default function Home() {
                   </div>
 
                   <button
-                    className="btn-action shadow-md"
+                    className="px-8 py-3 rounded-full bg-gray-900 hover:bg-gray-800 text-white font-medium text-sm transition-all shadow-md flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                     onClick={handleSummarize}
                     disabled={loading || !text.trim()}
                   >
@@ -183,14 +176,14 @@ export default function Home() {
               </section>
 
               {/* 2. Generated Summary & Metrics */}
-              <section className="space-y-4 flex-1">
-                <div className="flex items-center justify-between border-b border-gray-200/50 pb-2">
-                  <h2 className="text-lg font-semibold heading-display flex items-center gap-2" style={{ color: "var(--text-primary)" }}>
-                    <div className="w-2 h-2 rounded-full" style={{ background: "var(--deep-violet)" }} />
+              <section className="space-y-6 flex-1">
+                <div className="flex items-center justify-between border-b border-gray-200 pb-3">
+                  <h2 className="text-xl font-bold heading-display flex items-center gap-3" style={{ color: "var(--text-primary)" }}>
+                    <div className="w-2.5 h-2.5 rounded-full bg-indigo-500 shadow-sm shadow-indigo-200" />
                     Generated Summary
                   </h2>
                   {result && (
-                    <span className="text-xs font-medium px-2.5 py-1 rounded-md bg-purple-100 text-purple-800">
+                    <span className="text-xs font-semibold px-3 py-1.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-100">
                       {result.mode === "extractive" ? "TF-IDF" : "PEGASUS"}
                     </span>
                   )}
@@ -198,11 +191,11 @@ export default function Home() {
 
                 {result ? (
                   <div className="space-y-6">
-                    <div className="p-5 bg-white/50 rounded-xl border border-white/60 shadow-sm min-h-[140px]">
-                      <p className="result-summary text-[0.95rem]">{result.summary}</p>
+                    <div className="p-6 bg-white rounded-2xl border border-gray-100 shadow-sm min-h-[160px] text-gray-700 leading-relaxed text-[0.95rem]">
+                      <p>{result.summary}</p>
                     </div>
 
-                    <div className="grid grid-cols-3 gap-3">
+                    <div className="grid grid-cols-3 gap-4">
                       <MetricCard label="Inference Time" value={`${result.inference_time_ms?.toFixed(0) || "—"} ms`} />
                       <MetricCard label="Compression" value={`${result.compression_ratio?.toFixed(1) || "—"}%`} />
                       <MetricCard 
@@ -212,8 +205,8 @@ export default function Home() {
                     </div>
                   </div>
                 ) : (
-                  <div className="flex flex-col items-center justify-center h-48 border-2 border-dashed border-gray-300 rounded-xl bg-gray-50/30">
-                    <span className="text-gray-400 text-sm">Summary will appear here</span>
+                  <div className="flex flex-col items-center justify-center h-56 border-2 border-dashed border-gray-200 rounded-2xl bg-gray-50/50">
+                    <span className="text-gray-400 font-medium">Your summary will appear here</span>
                   </div>
                 )}
               </section>
@@ -222,32 +215,32 @@ export default function Home() {
 
 
             {/* ── RIGHT COLUMN ── */}
-            <div className="flex flex-col bg-white/40 p-6 rounded-2xl border border-white/60 shadow-sm space-y-10">
+            <div className="flex flex-col bg-gray-50/50 p-8 rounded-3xl border border-gray-100 space-y-12">
               
               {/* 1. Pipeline Inspection */}
-              <section className="space-y-5">
-                <h2 className="text-lg font-semibold heading-display flex items-center gap-2 border-b border-gray-200/50 pb-2" style={{ color: "var(--text-primary)" }}>
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--deep-violet)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+              <section className="space-y-6">
+                <h2 className="text-xl font-bold heading-display flex items-center gap-3 border-b border-gray-200 pb-3" style={{ color: "var(--text-primary)" }}>
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--deep-violet)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
                   Pipeline Analytics
                 </h2>
 
                 {preprocessData ? (
-                  <div className="space-y-6">
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  <div className="space-y-8">
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                       <PipelineStat label="Sentences" value={preprocessData.sentence_count} />
                       <PipelineStat label="Raw Tokens" value={preprocessData.raw_token_count} />
                       <PipelineStat label="Filtered Tokens" value={preprocessData.filtered_token_count} />
                       <PipelineStat label="Stop Words Removed" value={preprocessData.removed_stop_word_count} />
                     </div>
 
-                    <div className="space-y-4">
+                    <div className="space-y-5">
                       <div>
-                        <p className="text-[0.7rem] font-semibold uppercase tracking-wider mb-2 text-gray-500">
+                        <p className="text-[0.7rem] font-bold uppercase tracking-widest mb-3 text-gray-500">
                           Filtered tokens (sample):
                         </p>
-                        <div className="flex flex-wrap gap-1.5">
+                        <div className="flex flex-wrap gap-2">
                           {preprocessData.filtered_tokens?.slice(0, 30).map((tok, i) => (
-                            <span key={i} className="text-[0.7rem] px-2 py-0.5 rounded-md bg-purple-100/50 text-purple-700 border border-purple-200">
+                            <span key={i} className="text-xs px-2.5 py-1 rounded-md bg-indigo-50 text-indigo-700 border border-indigo-100">
                               {tok}
                             </span>
                           ))}
@@ -255,12 +248,12 @@ export default function Home() {
                       </div>
 
                       <div>
-                        <p className="text-[0.7rem] font-semibold uppercase tracking-wider mb-2 text-gray-500">
+                        <p className="text-[0.7rem] font-bold uppercase tracking-widest mb-3 text-gray-500">
                           Removed stop words (sample):
                         </p>
-                        <div className="flex flex-wrap gap-1.5">
+                        <div className="flex flex-wrap gap-2">
                           {[...new Set(preprocessData.removed_stop_words)]?.slice(0, 15).map((tok, i) => (
-                            <span key={i} className="text-[0.7rem] px-2 py-0.5 rounded-md bg-gray-100 text-gray-400 line-through">
+                            <span key={i} className="text-xs px-2.5 py-1 rounded-md bg-white border border-gray-200 text-gray-400 line-through">
                               {tok}
                             </span>
                           ))}
@@ -269,56 +262,33 @@ export default function Home() {
                     </div>
                   </div>
                 ) : (
-                  <div className="flex flex-col items-center justify-center h-32 border-2 border-dashed border-gray-300/60 rounded-xl bg-gray-50/30">
-                    <span className="text-gray-400 text-sm">Waiting for text processing...</span>
+                  <div className="flex flex-col items-center justify-center h-40 border-2 border-dashed border-gray-200 rounded-2xl bg-gray-50/50">
+                    <span className="text-gray-400 font-medium">Waiting for text processing...</span>
                   </div>
                 )}
               </section>
 
               {/* 2. ROUGE Evaluation */}
-              <section className="space-y-4 flex-1">
-                <h2 className="text-lg font-semibold heading-display flex items-center gap-2 border-b border-gray-200/50 pb-2" style={{ color: "var(--text-primary)" }}>
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--deep-violet)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="m9 12 2 2 4-4"></path></svg>
+              <section className="space-y-6 flex-1">
+                <h2 className="text-xl font-bold heading-display flex items-center gap-3 border-b border-gray-200 pb-3" style={{ color: "var(--text-primary)" }}>
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--deep-violet)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="m9 12 2 2 4-4"></path></svg>
                   ROUGE Evaluation
                 </h2>
 
-                <textarea
-                  value={refText}
-                  onChange={(e) => setRefText(e.target.value)}
-                  placeholder="Paste a reference summary here to compute ROUGE scores against the generated summary..."
-                  className="text-input shadow-inner bg-white/70"
-                  style={{ minHeight: "100px", fontSize: "0.85rem", padding: "16px" }}
-                />
-
-                <button
-                  className="btn-action w-full justify-center bg-white"
-                  onClick={handleEvaluate}
-                  disabled={evaluating || !refText.trim() || !result?.summary}
-                >
-                  {evaluating ? (
-                    <>
-                      <span className="spinner" />
-                      Evaluating…
-                    </>
-                  ) : (
-                    "Compute ROUGE Scores"
-                  )}
-                </button>
-
                 {rougeScores ? (
-                  <div className="p-4 bg-white/60 rounded-xl shadow-sm border border-white space-y-4 mt-2">
-                    <div className="text-[0.7rem] space-y-1 text-gray-600 mb-3">
-                      <p><strong>ROUGE-1</strong>: Exact word overlap.</p>
-                      <p><strong>ROUGE-L</strong>: Sentence structure overlap.</p>
-                      <p className="text-gray-400"><em>* Higher F1 is better. P=Precision, R=Recall.</em></p>
+                  <div className="p-6 bg-white rounded-2xl shadow-sm border border-gray-100 space-y-6">
+                    <div className="text-[0.75rem] space-y-1.5 text-gray-500 mb-4 bg-gray-50 p-4 rounded-xl border border-gray-100">
+                      <p><strong className="text-gray-700">ROUGE-1</strong>: Exact word overlap.</p>
+                      <p><strong className="text-gray-700">ROUGE-L</strong>: Sentence structure overlap.</p>
+                      <p className="text-indigo-400 mt-2"><em>* Automatically evaluated against original text. Higher F1 is better.</em></p>
                     </div>
                     <RougeMetric label="ROUGE-1" scores={rougeScores.rouge_1} />
                     <RougeMetric label="ROUGE-L" scores={rougeScores.rouge_l} />
                   </div>
                 ) : (
-                  <div className="flex flex-col items-center justify-center h-24 border-2 border-dashed border-gray-300/60 rounded-xl bg-gray-50/30 mt-2">
-                    <span className="text-gray-400 text-sm text-center px-4">
-                      {result ? "Enter reference text and compute scores" : "Generate a summary first"}
+                  <div className="flex flex-col items-center justify-center h-32 border-2 border-dashed border-gray-200 rounded-2xl bg-gray-50/50">
+                    <span className="text-gray-400 font-medium text-center px-4">
+                      {result ? "Calculating ROUGE scores automatically..." : "Generate a summary first"}
                     </span>
                   </div>
                 )}
@@ -337,18 +307,18 @@ export default function Home() {
 
 function MetricCard({ label, value }) {
   return (
-    <div className="bg-white/60 p-3 rounded-xl border border-white/40 shadow-sm text-center">
-      <div className="font-semibold text-lg" style={{ color: "var(--deep-violet)" }}>{value}</div>
-      <div className="text-[0.65rem] uppercase tracking-wider text-gray-500 mt-1">{label}</div>
+    <div className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm text-center flex flex-col justify-center">
+      <div className="font-bold text-xl text-indigo-600">{value}</div>
+      <div className="text-[0.7rem] font-bold uppercase tracking-widest text-gray-400 mt-1.5">{label}</div>
     </div>
   );
 }
 
 function PipelineStat({ label, value }) {
   return (
-    <div className="bg-white/60 p-3 rounded-xl border border-white/40 shadow-sm text-center">
-      <div className="font-semibold text-xl" style={{ color: "var(--text-primary)" }}>{value}</div>
-      <div className="text-[0.6rem] uppercase tracking-wider text-gray-500 mt-1 leading-tight">{label}</div>
+    <div className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm text-center flex flex-col justify-center">
+      <div className="font-bold text-2xl text-gray-800">{value}</div>
+      <div className="text-[0.65rem] font-bold uppercase tracking-widest text-gray-400 mt-1.5 leading-tight">{label}</div>
     </div>
   );
 }
@@ -357,17 +327,17 @@ function RougeMetric({ label, scores }) {
   return (
     <div className="space-y-2">
       <div className="flex items-center justify-between">
-        <span className="text-[0.75rem] font-bold uppercase tracking-wider text-indigo-800">
+        <span className="text-[0.75rem] font-bold uppercase tracking-widest text-indigo-700">
           {label}
         </span>
         <span className="text-sm font-bold text-gray-800">
           F1: {(scores.f1 * 100).toFixed(1)}%
         </span>
       </div>
-      <div className="h-1.5 rounded-full bg-gray-200 overflow-hidden">
-        <div className="h-full rounded-full bg-indigo-500" style={{ width: `${scores.f1 * 100}%` }} />
+      <div className="h-2 rounded-full bg-gray-100 overflow-hidden border border-gray-200">
+        <div className="h-full rounded-full bg-indigo-500 shadow-[inset_0_2px_4px_rgba(0,0,0,0.1)] transition-all duration-1000" style={{ width: `${scores.f1 * 100}%` }} />
       </div>
-      <div className="flex justify-between text-[0.7rem] text-gray-500">
+      <div className="flex justify-between text-xs font-medium text-gray-400">
         <span>P: {(scores.precision * 100).toFixed(1)}%</span>
         <span>R: {(scores.recall * 100).toFixed(1)}%</span>
       </div>
