@@ -93,35 +93,13 @@ export default function Home() {
       <Navbar />
 
       {/* ═══ Main Content ═══ */}
-      <main className="relative z-10 min-h-screen px-4 md:px-10 lg:px-16 pt-32 pb-24 max-w-[1400px] mx-auto w-full flex flex-col mt-8">
+      <main className="relative z-10 min-h-screen px-4 md:px-10 lg:px-16 pt-28 pb-24 max-w-[1500px] mx-auto w-full flex flex-col">
         
-        {/* Header Titles */}
-        <div className="w-full mb-12 flex flex-col md:flex-row md:items-end justify-between gap-6 px-4">
-          <div className="space-y-3">
-            <h1 className="heading-display text-4xl md:text-5xl font-extrabold tracking-tight" style={{ color: "var(--text-primary)" }}>
-              Create New Summary
-            </h1>
-            <p className="text-sm md:text-base text-gray-600 max-w-xl leading-relaxed">
-              Syllabus-aligned NLP pipeline supporting TF-IDF extractive and PEGASUS abstractive modes.
-            </p>
-          </div>
-          <div className="flex gap-2 pb-2">
-            <span className="badge-beta bg-white/70 backdrop-blur-md shadow-sm border border-white/60 px-4 py-2 text-sm rounded-full">
-              <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                <circle cx="6" cy="6" r="5" stroke="#6c5ce7" strokeWidth="1.5" fill="none" />
-                <circle cx="6" cy="6" r="2" fill="#6c5ce7" />
-              </svg>
-              NLP Mini-Project Live
-            </span>
-          </div>
-        </div>
-
-        {/* Dashboard Main Container */}
-        <div className="bg-white/80 backdrop-blur-xl border border-white/50 w-full p-8 md:p-12 rounded-[2rem] shadow-2xl shadow-indigo-500/10">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16">
-            
-            {/* ── LEFT COLUMN ── */}
-            <div className="flex flex-col space-y-12">
+        {/* Dashboard Grid Container */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 w-full mt-4">
+          
+          {/* ── LEFT COLUMN ── */}
+          <div className="flex flex-col space-y-12 bg-white p-8 md:p-10 rounded-2xl border border-gray-200 shadow-sm">
               
               {/* 1. Input Workspace */}
               <section className="space-y-6">
@@ -138,15 +116,15 @@ export default function Home() {
                 />
 
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-2">
-                  <div className="flex bg-gray-100/80 p-1.5 rounded-full border border-gray-200/50">
+                  <div className="flex bg-gray-100 p-1 rounded-md border border-gray-200">
                     <button
-                      className={`px-6 py-2.5 rounded-full text-sm font-medium transition-all ${mode === "extractive" ? "bg-white text-indigo-700 shadow-sm" : "text-gray-500 hover:text-gray-700"}`}
+                      className={`px-5 py-2 rounded-md text-sm font-medium transition-all ${mode === "extractive" ? "bg-white text-gray-900 shadow-sm border border-gray-200/50" : "text-gray-500 hover:text-gray-700"}`}
                       onClick={() => setMode("extractive")}
                     >
                       Extractive Matrix
                     </button>
                     <button
-                      className={`px-6 py-2.5 rounded-full text-sm font-medium transition-all ${mode === "abstractive" ? "bg-white text-indigo-700 shadow-sm" : "text-gray-500 hover:text-gray-700"}`}
+                      className={`px-5 py-2 rounded-md text-sm font-medium transition-all ${mode === "abstractive" ? "bg-white text-gray-900 shadow-sm border border-gray-200/50" : "text-gray-500 hover:text-gray-700"}`}
                       onClick={() => setMode("abstractive")}
                     >
                       Abstractive PEGASUS
@@ -154,7 +132,7 @@ export default function Home() {
                   </div>
 
                   <button
-                    className="px-8 py-3 rounded-full bg-gray-900 hover:bg-gray-800 text-white font-medium text-sm transition-all shadow-md flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="btn-action"
                     onClick={handleSummarize}
                     disabled={loading || !text.trim()}
                   >
@@ -179,11 +157,11 @@ export default function Home() {
               <section className="space-y-6 flex-1">
                 <div className="flex items-center justify-between border-b border-gray-200 pb-3">
                   <h2 className="text-xl font-bold heading-display flex items-center gap-3" style={{ color: "var(--text-primary)" }}>
-                    <div className="w-2.5 h-2.5 rounded-full bg-indigo-500 shadow-sm shadow-indigo-200" />
+                    <div className="w-2.5 h-2.5 rounded-full bg-gray-800" />
                     Generated Summary
                   </h2>
                   {result && (
-                    <span className="text-xs font-semibold px-3 py-1.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-100">
+                    <span className="text-xs font-semibold px-3 py-1.5 rounded-full bg-gray-100 text-gray-700 border border-gray-200">
                       {result.mode === "extractive" ? "TF-IDF" : "PEGASUS"}
                     </span>
                   )}
@@ -215,12 +193,12 @@ export default function Home() {
 
 
             {/* ── RIGHT COLUMN ── */}
-            <div className="flex flex-col bg-gray-50/50 p-8 rounded-3xl border border-gray-100 space-y-12">
+            <div className="flex flex-col space-y-12 bg-white p-8 md:p-10 rounded-2xl border border-gray-200 shadow-sm">
               
               {/* 1. Pipeline Inspection */}
               <section className="space-y-6">
                 <h2 className="text-xl font-bold heading-display flex items-center gap-3 border-b border-gray-200 pb-3" style={{ color: "var(--text-primary)" }}>
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--deep-violet)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
                   Pipeline Analytics
                 </h2>
 
@@ -240,7 +218,7 @@ export default function Home() {
                         </p>
                         <div className="flex flex-wrap gap-2">
                           {preprocessData.filtered_tokens?.slice(0, 30).map((tok, i) => (
-                            <span key={i} className="text-xs px-2.5 py-1 rounded-md bg-indigo-50 text-indigo-700 border border-indigo-100">
+                            <span key={i} className="text-xs px-2.5 py-1 rounded-md bg-gray-100 text-gray-700 border border-gray-200">
                               {tok}
                             </span>
                           ))}
@@ -271,7 +249,7 @@ export default function Home() {
               {/* 2. ROUGE Evaluation */}
               <section className="space-y-6 flex-1">
                 <h2 className="text-xl font-bold heading-display flex items-center gap-3 border-b border-gray-200 pb-3" style={{ color: "var(--text-primary)" }}>
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--deep-violet)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="m9 12 2 2 4-4"></path></svg>
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="m9 12 2 2 4-4"></path></svg>
                   ROUGE Evaluation
                 </h2>
 
@@ -280,7 +258,7 @@ export default function Home() {
                     <div className="text-[0.75rem] space-y-1.5 text-gray-500 mb-4 bg-gray-50 p-4 rounded-xl border border-gray-100">
                       <p><strong className="text-gray-700">ROUGE-1</strong>: Exact word overlap.</p>
                       <p><strong className="text-gray-700">ROUGE-L</strong>: Sentence structure overlap.</p>
-                      <p className="text-indigo-400 mt-2"><em>* Automatically evaluated against original text. Higher F1 is better.</em></p>
+                      <p className="text-gray-500 mt-2"><em>* Automatically evaluated against original text. Higher F1 is better.</em></p>
                     </div>
                     <RougeMetric label="ROUGE-1" scores={rougeScores.rouge_1} />
                     <RougeMetric label="ROUGE-L" scores={rougeScores.rouge_l} />
@@ -296,7 +274,6 @@ export default function Home() {
 
             </div>
 
-          </div>
         </div>
       </main>
     </>
@@ -307,18 +284,18 @@ export default function Home() {
 
 function MetricCard({ label, value }) {
   return (
-    <div className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm text-center flex flex-col justify-center">
-      <div className="font-bold text-xl text-indigo-600">{value}</div>
-      <div className="text-[0.7rem] font-bold uppercase tracking-widest text-gray-400 mt-1.5">{label}</div>
+    <div className="bg-white p-4 rounded-2xl border border-gray-200 shadow-sm text-center flex flex-col justify-center">
+      <div className="font-bold text-xl text-gray-900">{value}</div>
+      <div className="text-[0.7rem] font-bold uppercase tracking-widest text-gray-500 mt-1.5">{label}</div>
     </div>
   );
 }
 
 function PipelineStat({ label, value }) {
   return (
-    <div className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm text-center flex flex-col justify-center">
-      <div className="font-bold text-2xl text-gray-800">{value}</div>
-      <div className="text-[0.65rem] font-bold uppercase tracking-widest text-gray-400 mt-1.5 leading-tight">{label}</div>
+    <div className="bg-white p-4 rounded-2xl border border-gray-200 shadow-sm text-center flex flex-col justify-center">
+      <div className="font-bold text-2xl text-gray-900">{value}</div>
+      <div className="text-[0.65rem] font-bold uppercase tracking-widest text-gray-500 mt-1.5 leading-tight">{label}</div>
     </div>
   );
 }
@@ -327,17 +304,17 @@ function RougeMetric({ label, scores }) {
   return (
     <div className="space-y-2">
       <div className="flex items-center justify-between">
-        <span className="text-[0.75rem] font-bold uppercase tracking-widest text-indigo-700">
+        <span className="text-[0.75rem] font-bold uppercase tracking-widest text-gray-800">
           {label}
         </span>
-        <span className="text-sm font-bold text-gray-800">
+        <span className="text-sm font-bold text-gray-900">
           F1: {(scores.f1 * 100).toFixed(1)}%
         </span>
       </div>
-      <div className="h-2 rounded-full bg-gray-100 overflow-hidden border border-gray-200">
-        <div className="h-full rounded-full bg-indigo-500 shadow-[inset_0_2px_4px_rgba(0,0,0,0.1)] transition-all duration-1000" style={{ width: `${scores.f1 * 100}%` }} />
+      <div className="rouge-bar-track">
+        <div className="rouge-bar-fill" style={{ width: `${scores.f1 * 100}%` }} />
       </div>
-      <div className="flex justify-between text-xs font-medium text-gray-400">
+      <div className="flex justify-between text-xs font-medium text-gray-500">
         <span>P: {(scores.precision * 100).toFixed(1)}%</span>
         <span>R: {(scores.recall * 100).toFixed(1)}%</span>
       </div>

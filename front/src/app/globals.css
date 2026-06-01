@@ -5,22 +5,21 @@
 
 /* ─── Design Tokens (CSS Custom Properties) ──────── */
 :root {
-  --lavender: #e0d7ff;
-  --periwinkle: #c5baf2;
-  --deep-violet: #6c5ce7;
-  --soft-violet: #a29bfe;
-  --frost-white: rgba(255, 255, 255, 0.7);
-  --frost-border: rgba(255, 255, 255, 0.25);
-  --text-primary: #1a1625;
-  --text-secondary: #4a4458;
-  --text-muted: #7c7394;
-  --glass-bg: rgba(255, 255, 255, 0.12);
-  --glass-border: rgba(255, 255, 255, 0.2);
-  --shadow-soft: 0 8px 32px rgba(108, 92, 231, 0.12);
-  --shadow-glow: 0 0 60px rgba(108, 92, 231, 0.15);
-  --radius-lg: 24px;
-  --radius-md: 16px;
-  --radius-sm: 10px;
+  --primary-accent: #111827; /* Dark slate / black */
+  --secondary-accent: #374151; /* Medium gray */
+  --bg-main: #F7F7F9; /* Off-white main background */
+  --bg-card: #FFFFFF; /* Pure white */
+  --text-primary: #111827;
+  --text-secondary: #4B5563;
+  --text-muted: #9CA3AF;
+  
+  --border-light: #E5E7EB; /* Very subtle borders */
+  --shadow-soft: 0 4px 20px rgba(0, 0, 0, 0.03);
+  --shadow-hover: 0 10px 30px rgba(0, 0, 0, 0.06);
+  
+  --radius-xl: 16px;
+  --radius-lg: 12px;
+  --radius-md: 8px;
   --radius-pill: 9999px;
 }
 
@@ -42,54 +41,29 @@ html {
 body {
   font-family: "Inter", system-ui, -apple-system, sans-serif;
   color: var(--text-primary);
+  background-color: var(--bg-main);
   overflow-x: hidden;
   min-height: 100vh;
 }
 
-/* ─── Ambient Fluid Canvas Background ─────────────── */
+/* ─── Ambient Canvas (Removed for minimalism) ─────── */
 .ambient-canvas {
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  background:
-    radial-gradient(ellipse 80% 60% at 20% 40%, var(--lavender) 0%, transparent 70%),
-    radial-gradient(ellipse 60% 80% at 80% 60%, var(--periwinkle) 0%, transparent 70%),
-    radial-gradient(ellipse 50% 50% at 50% 20%, #f0edff 0%, transparent 60%),
-    linear-gradient(160deg, #f8f6ff 0%, var(--lavender) 40%, var(--periwinkle) 75%, #d4ccf0 100%);
-  animation: meshShift 20s ease-in-out infinite alternate;
+  display: none;
 }
 
-@keyframes meshShift {
-  0% {
-    background-position: 0% 0%, 100% 100%, 50% 0%, 0% 0%;
-  }
-  50% {
-    background-position: 30% 20%, 70% 80%, 60% 30%, 10% 10%;
-  }
-  100% {
-    background-position: 10% 40%, 90% 50%, 40% 10%, 5% 5%;
-  }
-}
-
-/* ─── Glassmorphism Utilities ─────────────────────── */
+/* ─── Glassmorphism (Replaced with Flat Cards) ────── */
 .glass-card {
-  background: var(--glass-bg);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid var(--glass-border);
-  border-radius: var(--radius-lg);
+  background: var(--bg-card);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-xl);
   box-shadow: var(--shadow-soft);
 }
 
 .glass-card-solid {
-  background: rgba(255, 255, 255, 0.65);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  border: 1px solid rgba(255, 255, 255, 0.4);
-  border-radius: var(--radius-lg);
-  box-shadow:
-    var(--shadow-soft),
-    inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  background: var(--bg-card);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-soft);
 }
 
 /* ─── Typography ──────────────────────────────────── */
@@ -109,39 +83,36 @@ body {
 /* ─── Pill Toggle ─────────────────────────────────── */
 .toggle-pill {
   display: inline-flex;
-  border-radius: var(--radius-pill);
-  background: rgba(255, 255, 255, 0.35);
-  backdrop-filter: blur(12px);
-  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  background: #F3F4F6;
+  border: 1px solid #E5E7EB;
   padding: 4px;
-  gap: 2px;
+  gap: 4px;
 }
 
 .toggle-pill button {
-  padding: 10px 22px;
-  border-radius: var(--radius-pill);
-  border: none;
+  padding: 8px 16px;
+  border-radius: var(--radius-md);
+  border: 1px solid transparent;
   font-family: "Inter", sans-serif;
   font-size: 0.85rem;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.2s ease;
   background: transparent;
-  color: var(--text-muted);
+  color: var(--text-secondary);
   white-space: nowrap;
 }
 
 .toggle-pill button.active {
-  background: white;
-  color: var(--deep-violet);
-  box-shadow:
-    0 2px 8px rgba(108, 92, 231, 0.15),
-    0 1px 3px rgba(0, 0, 0, 0.06);
+  background: var(--bg-card);
+  color: var(--primary-accent);
+  border-color: rgba(0,0,0,0.05);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .toggle-pill button:hover:not(.active) {
-  color: var(--text-secondary);
-  background: rgba(255, 255, 255, 0.2);
+  color: var(--text-primary);
 }
 
 /* ─── Action Button ───────────────────────────────── */
@@ -149,54 +120,34 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 13px 28px;
-  border-radius: var(--radius-pill);
-  border: 1.5px solid var(--text-primary);
-  background: transparent;
+  padding: 12px 24px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--primary-accent);
+  background: var(--primary-accent);
   font-family: "Inter", sans-serif;
   font-size: 0.9rem;
   font-weight: 500;
-  color: var(--text-primary);
+  color: #FFFFFF;
   cursor: pointer;
-  transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-  position: relative;
-  overflow: hidden;
-}
-
-.btn-action::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: var(--deep-violet);
-  transform: scaleX(0);
-  transform-origin: right;
-  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  z-index: -1;
-  border-radius: inherit;
+  transition: all 0.2s ease;
 }
 
 .btn-action:hover {
-  color: white;
-  border-color: var(--deep-violet);
+  background: #000000;
+  border-color: #000000;
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-hover);
 }
 
-.btn-action:hover::before {
-  transform: scaleX(1);
-  transform-origin: left;
+.btn-action:active {
+  transform: translateY(0);
 }
 
 .btn-action:disabled {
-  opacity: 0.5;
+  opacity: 0.6;
   cursor: not-allowed;
-}
-
-.btn-action:disabled:hover::before {
-  transform: scaleX(0);
-}
-
-.btn-action:disabled:hover {
-  color: var(--text-primary);
-  border-color: var(--text-primary);
+  transform: none;
+  box-shadow: none;
 }
 
 .btn-demo {
@@ -224,28 +175,27 @@ body {
 /* ─── Input Textarea ──────────────────────────────── */
 .text-input {
   width: 100%;
-  min-height: 180px;
-  padding: 24px;
-  border: none;
+  min-height: 220px;
+  padding: 20px;
+  border: 1px solid var(--border-light);
   border-radius: var(--radius-md);
-  background: rgba(255, 255, 255, 0.45);
+  background: var(--bg-card);
   font-family: "Inter", sans-serif;
   font-size: 0.95rem;
-  line-height: 1.7;
+  line-height: 1.6;
   color: var(--text-primary);
   resize: vertical;
-  transition: all 0.3s ease;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
   outline: none;
 }
 
 .text-input::placeholder {
   color: var(--text-muted);
-  font-style: italic;
 }
 
 .text-input:focus {
-  background: rgba(255, 255, 255, 0.6);
-  box-shadow: 0 0 0 2px rgba(108, 92, 231, 0.2);
+  border-color: var(--text-secondary);
+  box-shadow: 0 0 0 1px var(--text-secondary);
 }
 
 /* ─── Results Panel ───────────────────────────────── */
@@ -258,25 +208,18 @@ body {
 
 /* ─── Metric Dials ────────────────────────────────── */
 .metric-card {
-  background: rgba(255, 255, 255, 0.5);
-  backdrop-filter: blur(12px);
+  background: var(--bg-card);
   border-radius: var(--radius-md);
-  border: 1px solid rgba(255, 255, 255, 0.35);
-  padding: 20px;
+  border: 1px solid var(--border-light);
+  padding: 16px;
   text-align: center;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.metric-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(108, 92, 231, 0.12);
 }
 
 .metric-value {
   font-family: "Inter", sans-serif;
   font-size: 1.5rem;
-  font-weight: 700;
-  color: var(--deep-violet);
+  font-weight: 600;
+  color: var(--primary-accent);
 }
 
 .metric-label {
@@ -285,8 +228,8 @@ body {
   font-weight: 500;
   color: var(--text-muted);
   text-transform: uppercase;
-  letter-spacing: 0.08em;
-  margin-top: 6px;
+  letter-spacing: 0.05em;
+  margin-top: 4px;
 }
 
 /* ─── Badge ───────────────────────────────────────── */
@@ -294,13 +237,13 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 6px 16px;
+  padding: 4px 12px;
   border-radius: var(--radius-pill);
-  background: rgba(108, 92, 231, 0.1);
-  border: 1px solid rgba(108, 92, 231, 0.2);
-  font-size: 0.78rem;
+  background: #F3F4F6;
+  border: 1px solid #E5E7EB;
+  font-size: 0.75rem;
   font-weight: 500;
-  color: var(--deep-violet);
+  color: var(--text-secondary);
 }
 
 /* ─── Scrollbar ───────────────────────────────────── */
@@ -313,20 +256,20 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(108, 92, 231, 0.2);
+  background: #D1D5DB;
   border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(108, 92, 231, 0.35);
+  background: #9CA3AF;
 }
 
 /* ─── Loader Spinner ──────────────────────────────── */
 .spinner {
   width: 20px;
   height: 20px;
-  border: 2.5px solid rgba(108, 92, 231, 0.2);
-  border-top-color: var(--deep-violet);
+  border: 2px solid #E5E7EB;
+  border-top-color: var(--primary-accent);
   border-radius: 50%;
   animation: spin 0.7s linear infinite;
 }
@@ -350,15 +293,15 @@ body {
 
 /* ─── ROUGE score bars ────────────────────────────── */
 .rouge-bar-track {
-  height: 6px;
-  border-radius: 3px;
-  background: rgba(108, 92, 231, 0.1);
+  height: 4px;
+  border-radius: 2px;
+  background: #F3F4F6;
   overflow: hidden;
 }
 
 .rouge-bar-fill {
   height: 100%;
-  border-radius: 3px;
-  background: linear-gradient(90deg, var(--soft-violet), var(--deep-violet));
+  border-radius: 2px;
+  background: var(--primary-accent);
   transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
 }
