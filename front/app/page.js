@@ -12,25 +12,25 @@ export default function Home() {
   const [preprocessData, setPreprocessData] = useState(null);
   const [rougeScores, setRougeScores] = useState(null);
 
-  // Poll preprocessing endpoint while processing
+  // Poll preprocessing endpoint to display pipeline states while loading
   useEffect(() => {
     let interval;
     if (loading && text) {
       interval = setInterval(async () => {
         try {
-          const res = await fetch("https://sensessum-back.onrender.com/preprocess", {
+          const res = await fetch("https://sensessum-back.onrender.com/api/preprocess", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ text }),
           });
           if (res.ok) {
-            const data = await res.json();
-            setPreprocessData(data);
+            const response = await res.json();
+            setPreprocessData(response.data);
           }
         } catch (error) {
           console.error("Polling error:", error);
         }
-      }, 1500);
+      }, 1500); // Polling every 1.5s
     } else {
       setPreprocessData(null);
     }
@@ -42,28 +42,29 @@ export default function Home() {
     setLoading(true);
     setResult(null);
     setRougeScores(null);
-    setPreprocessData(null);
+    setPreprocessData(null); // Reset pipeline data
 
     try {
-      const res = await fetch("https://sensessum-back.onrender.com/summarize", {
+      const res = await fetch("https://sensessum-back.onrender.com/api/summarize", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text, model_type: mode }),
+        body: JSON.stringify({ text, mode: mode }),
       });
       const data = await res.json();
-      setResult(data);
+      setResult(data.data);
 
-      const rougeRes = await fetch("https://sensessum-back.onrender.com/evaluate", {
+      // Trigger Evaluation (ROUGE) automatically
+      const rougeRes = await fetch("https://sensessum-back.onrender.com/api/evaluate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          original_text: text,
-          summary_text: data.summary,
+          reference_summary: text,
+          generated_summary: data.data.summary,
         }),
       });
       if (rougeRes.ok) {
         const rougeData = await rougeRes.json();
-        setRougeScores(rougeData.scores);
+        setRougeScores(rougeData.data);
       }
     } catch (error) {
       console.error("Summarization failed:", error);
