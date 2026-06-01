@@ -12,8 +12,8 @@
 **SensesSum** is a modern, web-based NLP mini-project that delivers an end-to-end Text Summarization utility. Inspired by minimal, high-end aesthetics, the product bridges the gap between traditional academic NLP foundations and cutting-edge frontend user experiences. The application allows users to input raw documents, URLs, or articles and receive structured, highly accurate summaries using algorithms strictly aligned with the course syllabus.
 
 ### 1.2 Core Value Proposition
-- **Syllabus-Compliant Architecture:** Implements multiple levels of NLP paradigms taught in class, ranging from baseline statistical/linguistic methods (TF-IDF/LexRank) to sequence-to-sequence language modeling (T5).
-- **Immersive User Experience:** Departs from boring, clinical academic UIs by introducing a modern, fluid theme featuring real-time 3D feedback loops, canvas transitions, and an elegant layout modeled after the "Senses Innovations" design language.
+- **Syllabus-Compliant Architecture:** Implements multiple levels of NLP paradigms taught in class, ranging from baseline statistical/linguistic methods (TF-IDF/LexRank) to sequence-to-sequence language modeling (PEGASUS).
+- **Immersive User Experience:** Departs from boring, clinical academic UIs by introducing a modern, minimalist, Apple-inspired design language with clean functional cards and automated analytics.
 
 ---
 
@@ -26,7 +26,7 @@ To satisfy the requirements of a mini-project while respecting the constraint to
 | **Ingestion** | Document Reader & Normalizer | **Chapter II: Text Preprocessing** | Code steps for manual cleaning, regex-based tokenization, lowercase normalization, and stop-word removal. |
 | **Feature Eng.** | Text Vectorization Matrix | **Chapter IV: Text Representation** | Generates Bag-of-Words and TF-IDF matrices to evaluate sentence importance weights. |
 | **NLP Engine** | Baseline Model (Extractive) | **Chapter VI: Language Models (6.1)** | Extractive scoring built using Sentence-level N-gram overalps and Graph-based sentence similarity. |
-| **NLP Engine** | Core Model (Abstractive) | **Chapter VI: Language Models (6.4, 6.5)** | Abstractive generation using Recurrent Neural Networks (RNN/LSTM) or a pre-trained **T5 Architecture** (Explicitly referenced in Topic 5.2). |
+| **NLP Engine** | Core Model (Abstractive) | **Chapter VI: Language Models (6.4, 6.5)** | Abstractive generation using Recurrent Neural Networks (RNN/LSTM) or a pre-trained **PEGASUS Architecture** (Explicitly referenced in Topic 5.2/6.5). |
 | **Validation** | Quantitative Score Metrics | **Chapter VI: Evaluation (6.6)** | System calculation of ROUGE-1, ROUGE-2, and ROUGE-L metrics compared to user-provided or gold summaries. |
 | **Application**| Text Summarization Core | **Chapter VIII: Applications (8.2)** | Full execution of the designated Chapter 8 Application module. |
 
@@ -36,13 +36,13 @@ To satisfy the requirements of a mini-project while respecting the constraint to
 
 ### 3.1 Feature Breakdown
 
-#### 1. Elegant Dashboard & Hero Screen
-- **Landing State:** A clean visual landing view showing summary counts, a minimal glassmorphic workspace layout, and a floating interactive 3D mesh structure.
+#### 1. Elegant Dashboard Screen
+- **Landing State:** A clean visual dashboard showing a minimal, structural workspace layout divided into actionable inputs and analytical outputs.
 - **Input Channels:** Plain text paste box, file upload utility (.txt, .md), and a mock web scraping input field.
 
 #### 2. Dual-Engine Selector (Extractive vs. Abstractive)
 - **Extractive Switch:** Computes an exact extraction summary by picking top-weighted sentences based on *TF-IDF* and sentence metrics (Syllabus Chapter IV).
-- **Abstractive Switch:** Leverages a sequence-to-sequence conditional text generator framework (*T5-Small*) to synthesize rewritten, human-like summaries (Syllabus Chapter VI).
+- **Abstractive Switch:** Leverages a sequence-to-sequence conditional text generator framework (*PEGASUS*) via the HuggingFace API to synthesize rewritten, human-like summaries (Syllabus Chapter VI).
 
 #### 3. Real-Time "NLP Pipeline Inspection Window"
 - A slide-out panel that visually displays what the AI engine does at each syllabus phase:
@@ -50,7 +50,8 @@ To satisfy the requirements of a mini-project while respecting the constraint to
   - *Phase 2:* Matrix Weighting View (Highlighting words with the highest TF-IDF or embedding scores).
 
 #### 4. Analytics & Evaluation Scoreboard
-- Renders side-by-side execution statistics: Compression Ratio %, Inference Latency (ms), and Evaluation parameters (ROUGE Scores).
+- Renders side-by-side execution statistics: Compression Ratio %, Inference Latency (ms).
+- **Automated ROUGE Evaluation:** Automatically computes ROUGE-1 and ROUGE-L metrics instantly against the original source text upon generation.
 
 ### 3.2 User Stories
 - **As a Student**, I want to paste a long research paragraph into the tool so that I can see a 3-sentence high-level summary instantly.
@@ -82,7 +83,7 @@ To ensure simplicity, clean development boundaries, and rigorous adherence to th
 +------------------------------------------------------------------------+
 |                          AI / NLP ENGINE LAYER                         |
 |  - Preprocessing: NLTK / Scikit-Learn (Tokenization & TF-IDF)          |
-|  - Neural Inference: PyTorch + Hugging Face Transformers (T5-Small)   |
+|  - Neural Inference: Hugging Face Inference API (PEGASUS-xsum)        |
 |  - Evaluation: Rouge-Score Python Package                             |
 +------------------------------------------------------------------------+
 ```
@@ -107,8 +108,8 @@ The backend features an explicit code toggle between two engine paths:
 - The top $N$ sentences with the highest average term weights are selected and reordered chronologically to form the baseline summary.
 
 #### Option B: Abstractive Engine (Syllabus Chapters VI.4 / VI.5.2)
-- **Architecture:** Pre-trained **T5-Small Model** configured out of the box via PyTorch/Hugging Face. 
-- **Justification:** T5 is explicitly mandated in section 5.2 of the language model syllabus ("T5 as a translation large language model / generative large model"). For summarization, the prompt prefix `"summarize: "` is prepended to the input sequence before passing into the Encoder-Decoder transformer blocks.
+- **Architecture:** Pre-trained **PEGASUS Model** configured via Hugging Face Inference API. 
+- **Justification:** PEGASUS is explicitly designed for summarization using Gap Sentence Generation (GSG) as a pre-training objective, fitting the sequence-to-sequence generation syllabus requirements.
 
 ### 5.3 Step 3: Evaluation Framework (Chapter VI.6 Implementation)
 To fulfill the evaluation requirement of Chapter VI, the system includes a scoring utility utilizing the `rouge-score` package to evaluate machine outputs:
@@ -119,35 +120,29 @@ To fulfill the evaluation requirement of Chapter VI, the system includes a scori
 
 ## 6. UI/UX Design & Frontend Requirements
 
-### 6.1 Theme & Aesthetics (Derived from Reference Concept)
-- **Color Palette:** - *Canvas Background:* Sleek ambient dark/light fluid mesh. Soft, desaturated lavender (`#E0D7FF`), muted periwinkle (`#C5BAF2`), slate gray text bases, and brilliant white frosted overlays (`rgba(255, 255, 255, 0.7)`).
-  - *Accents:* Soft violet glows and thin, low-contrast border boundaries.
-- **Visual Structure:** Ultra-clean minimalist canvas layout. No heavy dashboard components or complex card structures. The input UI floats directly over an organic gradient background.
+### 6.1 Theme & Aesthetics (Minimalist Apple-Inspired Design)
+- **Color Palette:** 
+  - *Canvas Background:* Sleek, low-contrast off-white (`#F7F7F9`).
+  - *Cards & Surfaces:* Pure white (`#FFFFFF`) with extremely subtle 1px gray borders and soft diffused drop shadows.
+  - *Accents:* Solid dark slate/black (`#111827`) for primary actions, medium grays for secondary labels.
+- **Visual Structure:** Ultra-clean minimalist grid layout. A functional 2-column dashboard without heavy background gradients or glassmorphism.
 
-### 6.2 3D Element & Component Canvas (The 3D Ring Concept)
-To capture the exact design element from the user's reference image, the frontend integrates an interactive Canvas element using **React Three Fiber (R3F)**:
-- **The Element:** An abstract 3D layered ring/semicircle structure resting along the right/lower bounds of the viewport.
-- **Interactive States:**
-  - *Idle State:* The ring slowly pulses and rotates on a fixed axis with smooth, organic floating motions.
-  - *Processing State:* When the user hits "Summarize", the 3D ring alters its speed, drawing a glowing particle track or a spinning halo effect to reflect the tokenization/inference process.
-  - *Completion State:* Gently morphs or changes emission color to signal success, smoothly easing back into idle.
-
-### 6.3 Layout Architecture & UI Components
+### 6.2 Layout Architecture & UI Components
 
 #### Viewport Area 1: Top Navigation Bar
-- **Branding:** "SensesSum" text with a small custom SVG multi-axis abstract dot logo.
-- **Nav Items:** Minimalist links (Home, Architecture Mapping, Syllabus Check, Book a Call/Demo Button).
+- **Branding:** Minimalist "Pulsar.AI" or "SensesSum" text with a clean abstract dot logo.
+- **Nav Items:** Clean links (Home, Architecture, Syllabus Map).
+- **CTA:** Solid dark button for "Book A Call".
 
-#### Viewport Area 2: Workspace Core
-- **Input Terminal:** A glassmorphic text container (`backdrop-filter: blur(20px)`). Includes a soft typography placeholder reading: *"Paste your long text here to automate your reading workflow..."*
-- **Control Bar:** Integrated micro-buttons positioned elegantly at the bottom of the container box:
-  - Toggle switch pill: `[ Extractive Matrix ]` | `( Abstractive T5 )`
-  - Action button: `[ See Summary in Action ]` with an integrated arrow icon.
-
-#### Viewport Area 3: Results Panel (Animate-In)
-- Appears using a smooth Framer Motion vertical slide-up mask once the backend resolves.
-- **Left Column:** Rendered Summary Block using highly readable serif typography.
-- **Right Column:** Mini metric dials (Inference Time, Compression %, Token Count).
+#### Viewport Area 2: The Dashboard Grid
+- **Left Column (Workspace):** 
+  - A clean textarea container for document input.
+  - Segmented pill controls for `[ Extractive Matrix ]` | `[ Abstractive PEGASUS ]`.
+  - A solid dark `[ Generate ]` action button.
+  - Generated Summary output block with inference metrics.
+- **Right Column (Analytics):**
+  - Statically rendered Pipeline Analytics (Tokens, Sentences, Removed words).
+  - Automated ROUGE Evaluation progress bars that animate upon generation.
 
 ---
 
@@ -159,7 +154,7 @@ To capture the exact design element from the user's reference image, the fronten
 - **FR-3:** System must allow downloadable text outputs of the generated summary.
 
 ### 7.2 Non-Functional Requirements
-- **NFR-1 (Performance):** Baseline extractive summarization should complete in under 150ms; T5 Abstractive summarization should execute in under 2.5 seconds on local CPU threads.
+- **NFR-1 (Performance):** Baseline extractive summarization should complete in under 150ms; PEGASUS Abstractive summarization via HF Inference API depends on network latency but generally completes in ~1-3 seconds.
 - **NFR-2 (Animations & Fluidity):** Page frame rates must maintain a consistent 60fps across web browsers during 3D canvas rendering by optimizing mesh vertex count.
 - **NFR-3 (Simplicity & Maintainability):** The backend project code must be clean and un-bloated, isolating standard deep learning wrappers from core procedural python cleaning functions.
 
@@ -167,7 +162,6 @@ To capture the exact design element from the user's reference image, the fronten
 
 ## 8. Implementation Milestones & Roadmap
 
-- **Milestone 1 (Data & Core NLP Backend):** Script the Chapter II preprocessing steps. Build the native Python Scikit-Learn TF-IDF pipeline and wrap the Hugging Face T5 tokenization pipeline into functional Flask/FastAPI routes. (Duration: 3 Days)
-- **Milestone 2 (Frontend Theme Implementation):** Construct the basic React framework, establishing the exact CSS mesh gradients, layout frames, and glassmorphic panels mimicking the design reference image. (Duration: 3 Days)
-- **Milestone 3 (3D Accent & Framer Motion Integration):** Introduce React Three Fiber ring mesh structures. Program step-based micro-interactions connecting form states with animation transitions. (Duration: 2 Days)
-- **Milestone 4 (Pipeline Validation & Final Polish):** Integrate the ROUGE metrics scoreboard panel, verify rigorous alignment with syllabus topics, and execute debugging passes. (Duration: 2 Days)
+- **Milestone 1 (Data & Core NLP Backend):** Script the Chapter II preprocessing steps. Build the native Python Scikit-Learn TF-IDF pipeline and integrate the Hugging Face PEGASUS Inference API into functional FastAPI routes. (Duration: 3 Days)
+- **Milestone 2 (Frontend Theme Implementation):** Construct the basic React framework, establishing the minimalist flat card UI and off-white dashboard grid. (Duration: 3 Days)
+- **Milestone 3 (Pipeline Validation & Final Polish):** Integrate the automated ROUGE metrics scoreboard, verify rigorous alignment with syllabus topics, and execute debugging passes. (Duration: 2 Days)
