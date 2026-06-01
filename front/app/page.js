@@ -85,7 +85,10 @@ export default function Home() {
       <Navbar />
 
       {/* ═══ Main Content ═══ */}
-      <main className="relative z-10 min-h-screen px-4 md:px-10 lg:px-16 pt-32 pb-24 max-w-[1500px] mx-auto w-full flex flex-col">
+      <main 
+        className="relative z-10 min-h-screen px-4 md:px-10 lg:px-16 pb-24 max-w-[1500px] mx-auto w-full flex flex-col"
+        style={{ paddingTop: '9rem' }}
+      >
         
         {/* 1. Hero Text */}
         <div className="mb-12">
@@ -107,7 +110,7 @@ export default function Home() {
             {/* ── LEFT COLUMN (Input & Controls) ── */}
             <div className="p-8 md:p-12 flex flex-col space-y-8 relative z-10">
               
-              <div className="flex bg-white/60 p-1.5 rounded-full border border-white/80 shadow-sm self-start">
+              <div className="flex bg-gray-100 p-1.5 rounded-full border border-gray-200 shadow-sm self-start">
                 <button
                   className={`px-6 py-2.5 rounded-full text-sm font-medium transition-all ${mode === "extractive" ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-700"}`}
                   onClick={() => setMode("extractive")}
@@ -126,13 +129,13 @@ export default function Home() {
                 id="input-text"
                 value={text}
                 onChange={(e) => setText(e.target.value)}
-                className="w-full min-h-[300px] p-6 rounded-3xl bg-white/60 border border-white/80 shadow-inner focus:ring-2 focus:ring-indigo-300 outline-none resize-y text-gray-800 text-lg leading-relaxed transition-all placeholder-gray-400"
+                className="w-full min-h-[300px] p-6 rounded-3xl bg-white border border-gray-200 shadow-inner focus:ring-2 focus:ring-indigo-300 outline-none resize-y text-gray-800 text-lg leading-relaxed transition-all placeholder-gray-400"
                 placeholder="Paste your long text here to automate your reading workflow…"
                 rows={8}
               />
 
               <button
-                className="btn-primary-pill text-lg py-4 flex items-center justify-center gap-3 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-10 py-4 w-fit flex items-center justify-center gap-3 text-lg font-medium text-white bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full shadow-[0_4px_14px_0_rgba(79,70,229,0.39)] hover:-translate-y-px hover:shadow-[0_6px_20px_rgba(79,70,229,0.23)] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                 onClick={handleSummarize}
                 disabled={loading || !text.trim()}
               >
@@ -161,9 +164,9 @@ export default function Home() {
                 transition={{ repeat: Infinity, duration: 4, ease: "easeInOut" }} 
                 className="glass-card-v2 p-8"
               >
-                <div className="flex items-center justify-between border-b border-gray-200/60 pb-3 mb-4">
+                <div className="flex items-center justify-between border-b border-gray-200 pb-3 mb-4">
                   <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-                    <div className="w-2 h-2 rounded-full bg-indigo-500" />
+                    <div className="w-2.5 h-2.5 rounded-full bg-indigo-500" />
                     Generated Summary
                   </h2>
                 </div>
@@ -184,7 +187,7 @@ export default function Home() {
                 transition={{ repeat: Infinity, duration: 5, ease: "easeInOut", delay: 0.5 }} 
                 className="glass-card-v2 p-8"
               >
-                <div className="flex items-center justify-between border-b border-gray-200/60 pb-3 mb-4">
+                <div className="flex items-center justify-between border-b border-gray-200 pb-3 mb-4">
                   <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-blue-500"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
                     Pipeline Inspector
@@ -199,7 +202,7 @@ export default function Home() {
                       </p>
                       <div className="flex flex-wrap gap-1.5">
                         {preprocessData.filtered_tokens?.slice(0, 15).map((tok, i) => (
-                          <span key={i} className="text-[0.7rem] px-2 py-0.5 rounded bg-white/60 text-gray-700 border border-white">
+                          <span key={i} className="text-[0.7rem] px-2 py-0.5 rounded bg-gray-100 text-gray-700 border border-gray-200">
                             {tok}
                           </span>
                         ))}
@@ -228,7 +231,7 @@ export default function Home() {
             <ScoreboardMetric label="Compression" value={`${result.compression_ratio?.toFixed(1)}%`} />
             <ScoreboardMetric label="Words" value={result.summary?.split(/\s+/).length} />
             
-            <div className="col-span-2 flex flex-row gap-6">
+            <div className="col-span-2 grid grid-cols-2 gap-6">
               {rougeScores ? (
                 <>
                   <ScoreboardMetric label="ROUGE-1 F1" value={`${(rougeScores.rouge_1.f1 * 100).toFixed(1)}%`} />
@@ -247,6 +250,15 @@ export default function Home() {
 }
 
 /* ── UI Helper Components ────────────────────────── */
+
+function ScoreboardMetric({ label, value }) {
+  return (
+    <div className="glass-card-v2 p-6 flex flex-col items-center justify-center text-center">
+      <div className="text-3xl md:text-4xl font-extrabold text-indigo-600 mb-2">{value}</div>
+      <div className="text-[0.65rem] font-bold uppercase tracking-widest text-gray-500">{label}</div>
+    </div>
+  );
+}
 
 function MetricCard({ label, value }) {
   return (

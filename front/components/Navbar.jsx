@@ -49,7 +49,7 @@ export default function Navbar() {
           Have A Question?
         </span>
         <button
-          className="btn-primary-pill px-6 py-2.5 text-sm font-medium"
+          className="px-6 py-2.5 text-sm font-medium text-white bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full shadow-[0_4px_14px_0_rgba(79,70,229,0.39)] hover:-translate-y-px hover:shadow-[0_6px_20px_rgba(79,70,229,0.23)] transition-all whitespace-nowrap"
         >
           Book A Call
         </button>
